@@ -1,0 +1,94 @@
+{% extends "superadmin/base.html" %}
+
+{% block dashboard_title %}Organizer Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3>All Organizers</h3>
+    <a href="{% url 'superadmin:create_user' %}" class="btn btn-primary">
+      <i class="fas fa-user-plus"></i> Add Organizer
+    </a>
+  </div>
+  <div class="card-body">
+    {% if organizers %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Full Name</th>
+            <th>Type</th>
+            <th>Last Active</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for organizer in organizers %}
+            <tr>
+              <td>{{ organizer.username }}</td>
+              <td>{{ organizer.email }}</td>
+              <td>{{ organizer.get_full_name }}</td>
+              <td>
+                {% if organizer.is_admin %}
+                  <span class="badge bg-danger">Admin</span>
+                {% else %}
+                  <span class="badge bg-warning">Organizer</span>
+                {% endif %}
+              </td>
+              <td>{{ organizer.last_active|date:"M d, Y H:i" }}</td>
+              <td>
+                <div class="btn-group">
+                  <a href="{% url 'superadmin:edit_user' organizer.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  {% if not organizer.is_admin or organizer.id != request.user.id %}
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#removeOrganizerModal{{ organizer.id }}">
+                      <i class="fas fa-user-minus"></i> Remove
+                    </button>
+                  {% endif %}
+                </div>
+                
+                <!-- Remove Modal -->
+                {% if not organizer.is_admin or organizer.id != request.user.id %}
+                  <div class="modal fade" id="removeOrganizerModal{{ organizer.id }}" tabindex="-1" aria-labelledby="removeOrganizerModalLabel{{ organizer.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="removeOrganizerModalLabel{{ organizer.id }}">Confirm Action</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <p>Are you sure you want to remove {{ organizer.get_full_name }} ({{ organizer.username }}) from the organizer role?</p>
+                          {% if organizer.is_admin %}
+                            <p class="text-danger">Warning: This will remove admin privileges from this user.</p>
+                          {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <form method="post" action="#">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ organizer.id }}">
+                            <button type="submit" class="btn btn-danger" name="action" value="remove_organizer">Remove Organizer</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="text-center p-5">
+        <p class="text-muted">No organizers found.</p>
+        <a href="{% url 'superadmin:create_user' %}" class="btn btn-primary">
+          <i class="fas fa-user-plus"></i> Add Your First Organizer
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

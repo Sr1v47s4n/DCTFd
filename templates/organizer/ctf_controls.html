@@ -1,0 +1,407 @@
+{% extends "organizer/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block dashboard_title %}{% trans "CTF Controls" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3><i class="fas fa-toggle-on me-2"></i> {% trans "CTF Status Management" %}</h3>
+    <div class="header-actions">
+      <div class="badge fs-6 
+        {% if event.status == 'running' %}bg-success
+        {% elif event.status == 'paused' %}bg-warning
+        {% elif event.status == 'finished' %}bg-danger
+        {% elif event.status == 'planning' %}bg-secondary
+        {% elif event.status == 'registration' %}bg-info
+        {% else %}bg-secondary{% endif %} px-3 py-2 rounded-pill shadow-sm">
+        {% if event.status == 'running' %}
+          <i class="fas fa-play me-1"></i> {% trans "Currently Running" %}
+        {% elif event.status == 'paused' %}
+          <i class="fas fa-pause me-1"></i> {% trans "Currently Paused" %}
+        {% elif event.status == 'finished' %}
+          <i class="fas fa-flag-checkered me-1"></i> {% trans "Competition Ended" %}
+        {% elif event.status == 'planning' %}
+          <i class="fas fa-clipboard-list me-1"></i> {% trans "Planning" %}
+        {% elif event.status == 'registration' %}
+          <i class="fas fa-user-plus me-1"></i> {% trans "Registration Open" %}
+        {% else %}
+          <i class="fas fa-question-circle me-1"></i> {% trans "Unknown Status" %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <div class="card-body">
+    <div class="alert alert-info mb-4 border-0 shadow-sm">
+      <i class="fas fa-info-circle me-2"></i>
+      <span>{% trans "As a moderator, you have access to pause, resume, or end the CTF event. For other settings changes, please contact a Super Admin." %}</span>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-4 mb-4 mb-md-0">
+        <div class="status-card shadow-sm">
+          <div class="status-card-header">
+            <h4><i class="fas fa-clock me-2"></i> {% trans "Event Timeline" %}</h4>
+          </div>
+          <div class="status-card-body">
+            <div class="timeline-item">
+              <div class="timeline-label">{% trans "Start Time" %}:</div>
+              <div class="timeline-value">{{ event.start_time|date:"M d, Y H:i" }}</div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-label">{% trans "End Time" %}:</div>
+              <div class="timeline-value">{{ event.end_time|date:"M d, Y H:i" }}</div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-label">{% trans "Current Time" %}:</div>
+              <div class="timeline-value" id="currentTime"></div>
+            </div>
+            
+            <div class="timeline-item">
+              <div class="timeline-label">{% trans "Time Remaining" %}:</div>
+              <div class="timeline-value" id="timeRemaining"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4 mb-4 mb-md-0">
+        <div class="status-card shadow-sm">
+          <div class="status-card-header">
+            <h4><i class="fas fa-chart-bar me-2"></i> {% trans "Event Statistics" %}</h4>
+          </div>
+          <div class="status-card-body">
+            <div class="stat-item">
+              <div class="stat-label">{% trans "Total Participants" %}:</div>
+              <div class="stat-value">{{ total_users }}</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-label">{% trans "Total Teams" %}:</div>
+              <div class="stat-value">{{ total_teams }}</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-label">{% trans "Challenges Solved" %}:</div>
+              <div class="stat-value">{{ total_solves }}/{{ total_challenges }}</div>
+            </div>
+            
+            <div class="stat-item">
+              <div class="stat-label">{% trans "Total Submissions" %}:</div>
+              <div class="stat-value">{{ total_submissions }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4 mb-4 mb-md-0">
+        <div class="status-card shadow-sm">
+          <div class="status-card-header">
+            <h4><i class="fas fa-toggle-on me-2"></i> {% trans "Status Controls" %}</h4>
+          </div>
+          <div class="status-card-body">
+            {% if event.status == 'planning' %}
+              <form method="post" action="{% url 'organizer:start_ctf' %}" class="mb-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm">
+                  <i class="fas fa-play me-2"></i> {% trans "Start CTF" %}
+                </button>
+                <small class="text-muted d-block mt-2">
+                  {% trans "Start the CTF competition. Participants will be able to view and solve challenges." %}
+                </small>
+              </form>
+            {% elif event.status == 'registration' %}
+              <form method="post" action="{% url 'organizer:start_ctf' %}" class="mb-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm">
+                  <i class="fas fa-play me-2"></i> {% trans "Start CTF" %}
+                </button>
+                <small class="text-muted d-block mt-2">
+                  {% trans "Start the CTF competition. Participants will be able to view and solve challenges." %}
+                </small>
+              </form>
+            {% elif event.status == 'running' %}
+              <form method="post" action="{% url 'organizer:pause_ctf' %}" class="mb-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning btn-lg w-100 shadow-sm">
+                  <i class="fas fa-pause me-2"></i> {% trans "Pause CTF" %}
+                </button>
+                <small class="text-muted d-block mt-2">
+                  {% trans "Temporarily stops the CTF. Users won't be able to submit flags, but can still view challenges." %}
+                </small>
+              </form>
+            {% elif event.status == 'paused' %}
+              <form method="post" action="{% url 'organizer:resume_ctf' %}" class="mb-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm">
+                  <i class="fas fa-play me-2"></i> {% trans "Resume CTF" %}
+                </button>
+                <small class="text-muted d-block mt-2">
+                  {% trans "Resumes the CTF. Users will be able to submit flags again." %}
+                </small>
+              </form>
+            {% elif event.status == 'finished' %}
+              <div class="alert alert-info mb-3 border-0 shadow-sm">
+                <i class="fas fa-info-circle me-2"></i>
+                {% trans "This CTF competition has ended." %}
+              </div>
+            {% endif %}
+            
+            {% if event.status != 'finished' %}
+              <form method="post" action="{% url 'organizer:end_ctf' %}" onsubmit="return confirm('{% trans "Are you sure you want to end the CTF now? This will set the end time to the current time." %}')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-lg w-100 shadow-sm">
+                  <i class="fas fa-stop-circle me-2"></i> {% trans "End CTF Now" %}
+                </button>
+                <small class="text-muted d-block mt-2">
+                  {% trans "Immediately ends the CTF. The end time will be set to now and users won't be able to submit anymore." %}
+                </small>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="status-card shadow-sm">
+          <div class="status-card-header">
+            <h4><i class="fas fa-bullhorn me-2"></i> {% trans "Announcement" %}</h4>
+          </div>
+          <div class="status-card-body">
+            <form method="post" action="{% url 'organizer:send_announcement' %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="announcementText" class="form-label">{% trans "Send Announcement to All Participants" %}</label>
+                <textarea class="form-control shadow-sm" id="announcementText" name="announcement" rows="3" required placeholder="{% trans 'Enter your announcement message here...' %}"></textarea>
+              </div>
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="important" id="importantAnnouncement">
+                <label class="form-check-label" for="importantAnnouncement">
+                  {% trans "Mark as Important" %}
+                </label>
+              </div>
+              <button type="submit" class="btn btn-primary shadow-sm">
+                <i class="fas fa-paper-plane me-2"></i> {% trans "Send Announcement" %}
+              </button>
+            </form>
+            
+            {% if recent_announcements %}
+              <div class="mt-4">
+                <h5 class="border-bottom pb-2 mb-3">{% trans "Recent Announcements" %}</h5>
+                <div class="list-group shadow-sm">
+                  {% for announcement in recent_announcements %}
+                    <div class="list-group-item list-group-item-action {% if announcement.is_important %}list-group-item-warning{% endif %}">
+                      <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">
+                          {% if announcement.is_important %}
+                            <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                          {% else %}
+                            <i class="fas fa-info-circle me-2"></i>
+                          {% endif %}
+                          {% trans "Announcement" %}
+                        </h6>
+                        <small>{{ announcement.created_at|date:"M d, Y H:i" }}</small>
+                      </div>
+                      <p class="mb-1">{{ announcement.content }}</p>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Current time and countdown
+    const currentTimeElement = document.getElementById('currentTime');
+    const timeRemainingElement = document.getElementById('timeRemaining');
+    const endTime = new Date("{{ event.end_time|date:'Y-m-d H:i:s' }}");
+    
+    function updateTime() {
+      const now = new Date();
+      
+      // Update current time with fade effect
+      fadeUpdate(currentTimeElement, now.toLocaleString());
+      
+      // Update time remaining
+      if (now < endTime) {
+        const diff = endTime - now;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        const timeString = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        fadeUpdate(timeRemainingElement, timeString);
+        
+        if (diff < 86400000) { // Less than 24 hours
+          timeRemainingElement.classList.add('text-warning');
+          timeRemainingElement.classList.remove('text-danger');
+        } else {
+          timeRemainingElement.classList.remove('text-warning', 'text-danger');
+        }
+      } else {
+        fadeUpdate(timeRemainingElement, "{% trans 'CTF has ended' %}");
+        timeRemainingElement.classList.add('text-danger');
+        timeRemainingElement.classList.remove('text-warning');
+      }
+    }
+    
+    function fadeUpdate(element, newText) {
+      // Only update if text has changed
+      if (element.textContent !== newText) {
+        element.style.transition = 'opacity 0.3s ease';
+        element.style.opacity = '0';
+        
+        setTimeout(() => {
+          element.textContent = newText;
+          element.style.opacity = '1';
+        }, 300);
+      }
+    }
+    
+    // Initial update
+    updateTime();
+    
+    // Update every second
+    setInterval(updateTime, 1000);
+  });
+</script>
+{% endblock %}
+
+<style>
+  :root {
+    --card-bg: #ffffff;
+    --card-header-bg: #f8f9fa;
+    --card-border: #e9ecef;
+    --text-muted: #6c757d;
+    --border-light: #dee2e6;
+  }
+  
+  .status-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--card-border);
+  }
+  
+  .status-card-header {
+    background-color: var(--card-header-bg);
+    padding: 15px;
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  
+  .status-card-header h4 {
+    margin: 0;
+    color: var(--primary-color, #2563eb);
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .status-card-body {
+    padding: 20px;
+    flex: 1;
+  }
+  
+  .timeline-item, .stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  
+  .timeline-item:last-child, .stat-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .timeline-label, .stat-label {
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  
+  .timeline-value, .stat-value {
+    font-weight: 600;
+    color: var(--primary-color, #2563eb);
+  }
+  
+  /* Better badge colors with improved contrast */
+  .badge.bg-success {
+    background-color: #198754 !important;
+  }
+  
+  .badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+  }
+  
+  .badge.bg-danger {
+    background-color: #dc3545 !important;
+  }
+  
+  .badge.bg-info {
+    background-color: #0dcaf0 !important;
+    color: #212529 !important;
+  }
+  
+  .badge.bg-secondary {
+    background-color: #6c757d !important;
+  }
+  
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --card-bg: #212529;
+      --card-header-bg: #2c3034;
+      --card-border: #373b3e;
+      --text-muted: #adb5bd;
+      --border-light: #495057;
+    }
+    
+    .status-card {
+      background-color: var(--card-bg);
+    }
+    
+    .status-card-header {
+      background-color: var(--card-header-bg);
+    }
+    
+    .timeline-value, .stat-value {
+      color: #60a5fa;
+    }
+    
+    .text-muted {
+      color: #adb5bd !important;
+    }
+    
+    .list-group-item {
+      background-color: var(--card-bg);
+      border-color: var(--border-light);
+      color: #e9ecef;
+    }
+    
+    .list-group-item-warning {
+      background-color: #7d5a00;
+      color: #ffc107;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'organizer/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block dashboard_title %}{% trans "Import Challenges" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <div class="dashboard-card">
+        <div class="card-header">
+          <h3><i class="fas fa-file-import me-2"></i>{% trans "Import Challenges" %}</h3>
+        </div>
+        <div class="card-body">
+          <div class="import-instructions mb-4">
+            <h5>{% trans "Instructions" %}</h5>
+            <p>{% trans "Upload a JSON or YAML file containing challenge definitions to import. Supported formats include:" %}</p>
+            <ul>
+              <li>{% trans "CTFd export format" %}</li>
+              <li>{% trans "DCTFd JSON format" %}</li>
+              <li>{% trans "YAML challenge format" %}</li>
+            </ul>
+            
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              {% trans "Challenges with the same name will be updated rather than duplicated." %}
+            </div>
+          </div>
+          
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+              <label for="import_file" class="form-label">{% trans "Challenge File" %} *</label>
+              <input type="file" class="form-control" id="import_file" name="import_file" accept=".json,.yaml,.yml" required>
+              <div class="form-text">{% trans "Upload a JSON or YAML file containing challenge definitions." %}</div>
+            </div>
+            
+            <div class="mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="override_existing" name="override_existing">
+                <label class="form-check-label" for="override_existing">
+                  {% trans "Override existing challenges" %}
+                </label>
+                <div class="form-text">{% trans "If checked, existing challenges with the same name will be completely replaced." %}</div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="skip_errors" name="skip_errors">
+                <label class="form-check-label" for="skip_errors">
+                  {% trans "Skip errors" %}
+                </label>
+                <div class="form-text">{% trans "If checked, the import will continue even if some challenges fail to import." %}</div>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a href="{% url 'organizer:challenges' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-2"></i>{% trans "Cancel" %}
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-file-import me-2"></i>{% trans "Import Challenges" %}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Import Format Help -->
+      <div class="dashboard-card mt-4">
+        <div class="card-header">
+          <h3><i class="fas fa-question-circle me-2"></i>{% trans "Import Format Examples" %}</h3>
+        </div>
+        <div class="card-body">
+          <ul class="nav nav-tabs" id="formatTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="json-tab" data-bs-toggle="tab" data-bs-target="#json-format" type="button" role="tab" aria-controls="json-format" aria-selected="true">JSON Format</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="yaml-tab" data-bs-toggle="tab" data-bs-target="#yaml-format" type="button" role="tab" aria-controls="yaml-format" aria-selected="false">YAML Format</button>
+            </li>
+          </ul>
+          <div class="tab-content p-3 border border-top-0 rounded-bottom" id="formatTabsContent">
+            <div class="tab-pane fade show active" id="json-format" role="tabpanel" aria-labelledby="json-tab">
+              <pre class="code-block"><code>{
+  "challenges": [
+    {
+      "name": "Example Challenge",
+      "category": "Web",
+      "description": "This is an example challenge description.",
+      "points": 100,
+      "flags": ["flag{example_flag}"],
+      "hints": [
+        {"content": "This is a hint", "cost": 10}
+      ],
+      "files": [],
+      "tags": ["web", "beginner"]
+    }
+  ]
+}</code></pre>
+            </div>
+            <div class="tab-pane fade" id="yaml-format" role="tabpanel" aria-labelledby="yaml-tab">
+              <pre class="code-block"><code>challenges:
+  - name: Example Challenge
+    category: Web
+    description: This is an example challenge description.
+    points: 100
+    flags:
+      - flag{example_flag}
+    hints:
+      - content: This is a hint
+        cost: 10
+    files: []
+    tags:
+      - web
+      - beginner</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .code-block {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 0;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .code-block {
+      background-color: #2d2d2d;
+      color: #f8f9fa;
+    }
+  }
+</style>
+{% endblock %}

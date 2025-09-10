@@ -1,0 +1,402 @@
+{% extends "organizer/base.html" %}
+
+{% block dashboard_title %}{% if challenge %}Edit Challenge{% else %}Create Challenge{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-section {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .form-section-title {
+    color: #4e31aa;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 8px;
+  }
+  
+  .form-label {
+    color: #2c2c2c !important;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  
+  .form-control, .form-select {
+    background-color: #ffffff !important;
+    border: 1px solid #ced4da !important;
+    color: #495057 !important;
+    border-radius: 4px;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background-color: #ffffff !important;
+    border-color: #4e31aa !important;
+    color: #495057 !important;
+    box-shadow: 0 0 0 0.25rem rgba(78, 49, 170, 0.25) !important;
+  }
+  
+  .form-text {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+  }
+  
+  .required::after {
+    content: " *";
+    color: #e74c3c;
+  }
+  
+  .btn-primary {
+    background-color: #4e31aa !important;
+    border-color: #4e31aa !important;
+    color: #ffffff !important;
+  }
+  
+  .btn-primary:hover {
+    background-color: #3a2683 !important;
+    border-color: #3a2683 !important;
+    color: #ffffff !important;
+  }
+  
+  .invalid-feedback {
+    display: block !important;
+    color: #e74c3c !important;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+  
+  .alert {
+    border-radius: 8px;
+    border: none;
+    padding: 15px;
+  }
+  
+  .alert-danger {
+    background-color: rgba(231, 76, 60, 0.1) !important;
+    border-left: 4px solid #e74c3c !important;
+    color: #c0392b !important;
+  }
+  
+  .alert-success {
+    background-color: rgba(46, 204, 113, 0.1) !important;
+    border-left: 4px solid #2ecc71 !important;
+    color: #27ae60 !important;
+  }
+  
+  .card {
+    background-color: #ffffff !important;
+    color: #2c2c2c !important;
+  }
+  
+  .card-header {
+    background-color: #f8f9fa !important;
+    color: #2c2c2c !important;
+  }
+  
+  .card-title {
+    color: #4e31aa !important;
+  }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h3 class="card-title mb-0">
+            <i class="fas {% if challenge %}fa-edit{% else %}fa-plus{% endif %} me-2"></i>
+            {% if challenge %}Edit Challenge: {{ challenge.name }}{% else %}Create New Challenge{% endif %}
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Non-field errors -->
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+          {{ error }}
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <div class="row">
+      <div class="col-lg-8">
+        <!-- Basic Information -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <i class="fas fa-info-circle me-2"></i>
+            Basic Information
+          </h4>
+          
+          <div class="row">
+            <div class="col-md-8">
+              <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label required">Challenge Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="{{ form.value.id_for_label }}" class="form-label required">Points</label>
+                {{ form.value }}
+                {% if form.value.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.value.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label required">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.description.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">You can use Markdown formatting. HTML is also supported.</div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.category.id_for_label }}" class="form-label required">Category</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.category.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.event.id_for_label }}" class="form-label required">Event</label>
+                {{ form.event }}
+                {% if form.event.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.event.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scoring Configuration -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <i class="fas fa-trophy me-2"></i>
+            Scoring Configuration
+          </h4>
+          
+          <div class="row">
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="{{ form.initial_value.id_for_label }}" class="form-label">Initial Value</label>
+                {{ form.initial_value }}
+                {% if form.initial_value.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.initial_value.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">For dynamic scoring</div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="{{ form.min_value.id_for_label }}" class="form-label">Minimum Value</label>
+                {{ form.min_value }}
+                {% if form.min_value.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.min_value.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Minimum points possible</div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="{{ form.decay.id_for_label }}" class="form-label">Decay Factor</label>
+                {{ form.decay }}
+                {% if form.decay.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.decay.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Score reduction rate (0.01-1.0)</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.decay_threshold.id_for_label }}" class="form-label">Decay Threshold</label>
+                {{ form.decay_threshold }}
+                {% if form.decay_threshold.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.decay_threshold.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Solves before decay starts</div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.max_attempts.id_for_label }}" class="form-label">Max Attempts</label>
+                {{ form.max_attempts }}
+                {% if form.max_attempts.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.max_attempts.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">0 = unlimited attempts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <!-- Settings -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <i class="fas fa-cog me-2"></i>
+            Challenge Settings
+          </h4>
+          
+          <div class="mb-3">
+            <label for="{{ form.difficulty.id_for_label }}" class="form-label">Difficulty</label>
+            {{ form.difficulty }}
+            {% if form.difficulty.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.difficulty.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">1 = Easy, 5 = Hard</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.type.id_for_label }}" class="form-label">Type</label>
+            {{ form.type }}
+            {% if form.type.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.type.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.state.id_for_label }}" class="form-label">State</label>
+            {{ form.state }}
+            {% if form.state.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.state.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.flag_logic.id_for_label }}" class="form-label">Flag Logic</label>
+            {{ form.flag_logic }}
+            {% if form.flag_logic.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.flag_logic.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">How multiple flags are validated</div>
+          </div>
+          
+          <div class="form-check">
+            {{ form.is_visible }}
+            <label class="form-check-label" for="{{ form.is_visible.id_for_label }}">
+              Visible to participants
+            </label>
+            {% if form.is_visible.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.is_visible.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <i class="fas fa-bolt me-2"></i>
+            Quick Actions
+          </h4>
+          
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>
+              {% if challenge %}Update Challenge{% else %}Create Challenge{% endif %}
+            </button>
+            
+            {% if challenge %}
+              <a href="{% url 'organizer:challenge_detail' challenge.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-eye me-2"></i>
+                View Challenge
+              </a>
+            {% endif %}
+            
+            <a href="{% url 'organizer:challenges' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-arrow-left me-2"></i>
+              Back to Challenges
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Auto-fill initial_value when value changes
+  document.addEventListener('DOMContentLoaded', function() {
+    const valueField = document.getElementById('{{ form.value.id_for_label }}');
+    const initialValueField = document.getElementById('{{ form.initial_value.id_for_label }}');
+    const minValueField = document.getElementById('{{ form.min_value.id_for_label }}');
+    
+    if (valueField) {
+      valueField.addEventListener('input', function() {
+        if (!initialValueField.value) {
+          initialValueField.value = this.value;
+        }
+        if (!minValueField.value) {
+          minValueField.value = Math.floor(this.value / 2);
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

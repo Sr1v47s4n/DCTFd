@@ -1,0 +1,240 @@
+/* CTF Theme - Cyberpunk-inspired single-event CTF platform styling */
+
+:root {
+  /* Primary color palette */
+  --primary-color: #0072c6;
+  --primary-dark: #00559b;
+  --primary-light: #339dff;
+  --accent-color: #ff3e7f;
+  --secondary-color: #ffdc5e;
+  
+  /* Status colors */
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  
+  /* Light theme colors */
+  --dark-bg: #ffffff;
+  --dark-card: #f8f9fa;
+  --dark-card-alt: #e9ecef;
+  --dark-border: #dee2e6;
+  
+  /* Text colors */
+  --text-light: #ffffff;
+  --text-dark: #212529;
+  --text-muted: #6c757d;
+  
+  /* Button colors */
+  --btn-primary: #212529;
+  --btn-primary-hover: #343a40;
+  --btn-text: #ffffff;
+  
+  /* Other UI elements */
+  --sidebar-width: 250px;
+  --sidebar-collapsed: 70px;
+  --border-radius: 8px;
+  --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* CTF Status indicators */
+.ctf-status-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.ctf-status-item {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius);
+  padding: 12px 15px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.status-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.status-value {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* CTF Action buttons */
+.ctf-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.ctf-actions .btn {
+  min-width: 140px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+}
+
+/* Challenge cards */
+.challenge-card {
+  background-color: var(--dark-card);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--dark-border);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.challenge-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border-color: var(--primary-color);
+}
+
+.challenge-header {
+  padding: 15px;
+  background-color: var(--dark-card-alt);
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.challenge-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-dark);
+}
+
+.challenge-category {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.challenge-body {
+  padding: 15px;
+  flex-grow: 1;
+}
+
+.challenge-description {
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+.challenge-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.challenge-points {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.challenge-solves {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Team standings table styling */
+.team-standings {
+  margin-top: 30px;
+}
+
+.team-standings h2 {
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+}
+
+/* Flag submission form */
+.flag-form {
+  margin-top: 30px;
+  background-color: var(--dark-card);
+  padding: 20px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--dark-border);
+}
+
+.flag-form .form-label {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.flag-form .form-control {
+  border-radius: var(--border-radius);
+  border: 1px solid var(--dark-border);
+  padding: 12px 15px;
+  font-family: monospace;
+}
+
+.flag-form .form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0, 114, 198, 0.25);
+}
+
+.flag-submit-btn {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 12px 25px;
+  transition: all 0.3s ease;
+}
+
+.flag-submit-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 114, 198, 0.3);
+}
+
+/* Custom Button Styles */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  font-weight: 600;
+}
+
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .ctf-status-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .ctf-actions .btn {
+    min-width: auto;
+    flex: 1 0 auto;
+  }
+  
+  .challenge-card {
+    margin-bottom: 20px;
+  }
+}

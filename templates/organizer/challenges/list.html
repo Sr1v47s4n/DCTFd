@@ -1,0 +1,1036 @@
+{% extends "organizer/base.html" %}
+
+{% block dashboard_title %}Challenges{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Challenges container */
+  .challenges-container {
+    margin-top: 30px;
+  }
+  
+  /* Search and filter styles */
+  .dashboard-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  
+  .search-box {
+    position: relative;
+    width: 300px;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border-radius: 20px;
+    border: 1px solid var(--gray-light);
+    background-color: var(--light-color);
+    transition: all 0.3s;
+    color: var(--text-dark);
+  }
+  
+  .search-box input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.2);
+    border-color: var(--primary-color);
+  }
+  
+  .search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray);
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  
+  /* Category filters */
+  .category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+  
+  .category-filter {
+    background-color: var(--light-color);
+    border: 1px solid var(--gray-light);
+    color: var(--primary-color);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  
+  .category-filter.active, .category-filter:hover {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    border-color: var(--primary-color);
+  }
+  
+  .category-filter .count {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+    font-weight: bold;
+  }
+  
+  /* Category section */
+  .category-section {
+    margin-bottom: 35px;
+  }
+  
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .category-header h3 {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+  }
+  
+  .category-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: inline-block;
+  }
+  
+  .challenge-count {
+    font-weight: 500;
+  }
+  
+  /* Challenge grid */
+  .challenges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .challenge-card {
+    background: var(--light-color);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--gray-light);
+  }
+  
+  .challenge-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .challenge-card.challenge-hidden {
+    opacity: 0.7;
+  }
+  
+  .challenge-card-header {
+    background-color: var(--light-color);
+    padding: 15px;
+    border-bottom: 1px solid var(--gray-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .challenge-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+  
+  .challenge-points {
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+  
+  .challenge-card-body {
+    padding: 15px;
+    flex-grow: 1;
+  }
+  
+  .challenge-description {
+    margin-bottom: 15px;
+    color: var(--text-dark);
+  }
+  
+    .challenge-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+    font-size: 0.85rem;
+    color: var(--gray);
+  }
+  
+  .challenge-difficulty, .challenge-solves, .challenge-prerequisites, .challenge-unlocks {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .challenge-prerequisites {
+    color: #6c757d;
+  }
+  
+  .challenge-unlocks {
+    color: #28a745;
+  }
+  
+  .challenge-difficulty {
+  
+  .challenge-card-footer {
+    padding: 10px 15px;
+    background-color: var(--light-color);
+    border-top: 1px solid var(--gray-light);
+    display: flex;
+    gap: 5px;
+  }
+  
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: var(--light-color);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  
+  .empty-state i {
+    color: var(--gray);
+    margin-bottom: 20px;
+  }
+  
+  .empty-state h3 {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+  }
+  
+  .empty-state p {
+    color: var(--gray);
+    margin-bottom: 25px;
+  }
+  
+  .empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  /* Alert styling */
+  .alert-info {
+    background-color: rgba(78, 115, 223, 0.1);
+    border-color: rgba(78, 115, 223, 0.2);
+    color: var(--primary-color);
+    border-radius: 10px;
+  }
+  
+  .alert-info h5 {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+  
+  .alert-info ul {
+    margin-bottom: 0;
+    color: var(--primary-color);
+  }
+  
+  /* Dropdown menu */
+  .dropdown-menu {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--gray-light);
+    padding: 8px 0;
+    background-color: var(--light-color);
+  }
+  
+  .dropdown-item {
+    padding: 8px 15px;
+    color: var(--text-dark);
+  }
+  
+  .dropdown-item:hover, .dropdown-item:focus {
+    background-color: rgba(78, 115, 223, 0.1);
+    color: var(--primary-color);
+  }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-header-actions">
+  <div class="search-box">
+    <input type="text" id="challengeSearch" placeholder="Search challenges...">
+    <i class="fas fa-search"></i>
+  </div>
+  
+  <div class="action-buttons">
+    <a href="{% url 'organizer:create_challenge' %}" class="btn btn-primary">
+      <i class="fas fa-plus me-2"></i> Add Challenge
+    </a>
+    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importChallengesModal">
+      <i class="fas fa-file-import me-2"></i> Import
+    </button>
+    <a href="{% url 'organizer:download_challenge_template' %}" class="btn btn-outline-secondary">
+      <i class="fas fa-download me-2"></i> Template
+    </a>
+    <div class="dropdown">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-tags me-2"></i> Categories
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Add Category</a></li>
+        <li><a class="dropdown-item" href="{% url 'organizer:categories' %}">Manage Categories</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% if categories %}
+<div class="category-filters">
+  <button class="category-filter active" data-category="all">All</button>
+  {% for category in categories %}
+    <button class="category-filter" data-category="{{ category.slug }}" style="--category-color: {{ category.color }}">
+      {{ category.name }} <span class="count">{{ category.challenge_count|default:"0" }}</span>
+    </button>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="alert alert-info mb-4">
+  <h5><i class="fas fa-info-circle me-2"></i> Organizer Permissions</h5>
+  <p>As an organizer, you can:</p>
+  <ul>
+    <li>Create, view, and edit challenges</li>
+    <li>Show or hide challenges from participants</li>
+    <li>Export and duplicate challenges</li>
+    {% if request.user.is_admin %}
+    <li>Delete challenges (admin only)</li>
+    {% else %}
+    <li><span class="text-muted">Delete challenges (admin only)</span></li>
+    {% endif %}
+  </ul>
+</div>
+
+<div class="challenges-container">
+  {% if challenges %}
+    {% for category, category_challenges in challenges_by_category.items %}
+      <div class="category-section" id="category-{{ category.slug }}">
+        <div class="category-header">
+          <h3>
+            <span class="category-color" style="background-color: {{ category.color }}"></span>
+            {{ category.name }}
+          </h3>
+          <span class="challenge-count badge bg-primary fs-6">{{ category_challenges|length|default:"0" }} {% if category_challenges|length == 0 %}challenges{% elif category_challenges|length == 1 %}challenge{% else %}challenges{% endif %}</span>
+        </div>
+        
+        <div class="challenges-grid">
+          {% for challenge in category_challenges %}
+            <div class="challenge-card {% if not challenge.is_visible %}challenge-hidden{% endif %}" data-id="{{ challenge.id }}" data-category="{{ challenge.category.slug }}">
+              <div class="challenge-card-header">
+                <h4 class="challenge-title">
+                  {{ challenge.name }}
+                  {% if not challenge.is_visible %}
+                  <span class="badge bg-warning"><i class="fas fa-eye-slash"></i> Hidden</span>
+                  {% endif %}
+                </h4>
+                <div class="challenge-points">{{ challenge.value|default:"0" }} pts</div>
+              </div>
+              
+              <div class="challenge-card-body">
+                <div class="challenge-description">{{ challenge.description|truncatechars:100 }}</div>
+                
+                <div class="challenge-meta">
+                  <div class="challenge-difficulty">
+                    <span class="difficulty-label">Difficulty:</span>
+                    <div class="difficulty-dots">
+                      {% for i in "12345" %}
+                        <span class="difficulty-dot {% if forloop.counter <= challenge.difficulty|default:1 %}active{% endif %}"></span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  
+                  <div class="challenge-solves">
+                    <i class="fas fa-check-circle"></i> {{ challenge.solve_count|default:"0" }} solves
+                  </div>
+                  
+                  {% if challenge.prerequisites.exists %}
+                  <div class="challenge-prerequisites">
+                    <i class="fas fa-tasks"></i> {{ challenge.prerequisites.count }} prerequisite{{ challenge.prerequisites.count|pluralize }}
+                  </div>
+                  {% endif %}
+                  
+                  {% if challenge.unlocks.exists %}
+                  <div class="challenge-unlocks">
+                    <i class="fas fa-unlock"></i> Unlocks {{ challenge.unlocks.count }} challenge{{ challenge.unlocks.count|pluralize }}
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="challenge-card-footer">
+                <a href="{% url 'organizer:challenge_detail' challenge.id %}" class="btn btn-sm btn-primary">View</a>
+                <a href="{% url 'organizer:edit_challenge' challenge.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{% url 'organizer:toggle_challenge_visibility' challenge.id %}" 
+                   class="btn btn-sm {% if challenge.is_visible %}btn-outline-warning{% else %}btn-outline-success{% endif %}"
+                   onclick="event.preventDefault(); document.getElementById('toggle-visibility-form-{{ challenge.id }}').submit();">
+                  {% if challenge.is_visible %}
+                  <i class="fas fa-eye-slash"></i> Hide
+                  {% else %}
+                  <i class="fas fa-eye"></i> Show
+                  {% endif %}
+                </a>
+                <form id="toggle-visibility-form-{{ challenge.id }}" action="{% url 'organizer:toggle_challenge_visibility' challenge.id %}" method="POST" style="display: none;">
+                  {% csrf_token %}
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <i class="fas fa-flag fa-4x mb-3"></i>
+      <h3>No Challenges Yet</h3>
+      <p>Start by creating your first challenge or importing from existing files.</p>
+      <div class="empty-actions">
+        <a href="{% url 'organizer:create_challenge' %}" class="btn btn-primary">
+          <i class="fas fa-plus me-2"></i> Create Challenge
+        </a>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importChallengesModal">
+          <i class="fas fa-file-import me-2"></i> Import Challenges
+        </button>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="addCategoryForm" method="post" action="{% url 'organizer:add_category' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="categoryName" class="form-label">Category Name</label>
+            <input type="text" class="form-control" id="categoryName" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="categoryColor" class="form-label">Color</label>
+            <input type="color" class="form-control form-control-color" id="categoryColor" name="color" value="#3498db">
+          </div>
+          <div class="mb-3">
+            <label for="categoryDescription" class="form-label">Description (Optional)</label>
+            <textarea class="form-control" id="categoryDescription" name="description" rows="3"></textarea>
+          </div>
+          
+          <div class="alert alert-danger d-none" id="categoryFormError"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Import Challenges Modal -->
+<div class="modal fade" id="importChallengesModal" tabindex="-1" aria-labelledby="importChallengesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importChallengesModalLabel">Import Challenges</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-8">
+            <form method="post" action="{% url 'organizer:challenges_import' %}" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="importFile" class="form-label">Challenge File</label>
+                <input type="file" class="form-control" id="importFile" name="import_file" accept=".json,.zip" required>
+                <div class="form-text">Supported format: JSON</div>
+              </div>
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="overwriteExisting" name="overwrite_existing">
+                <label class="form-check-label" for="overwriteExisting">
+                  Overwrite existing challenges with the same name
+                </label>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Import Challenges</button>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-4">
+            <div class="border-start ps-4">
+              <h6 class="mb-3"><i class="fas fa-download me-2"></i>Sample Template</h6>
+              <p class="small text-muted mb-3">Download a sample JSON template to get started quickly with the correct format.</p>
+              <a href="{% url 'organizer:download_challenge_template' %}" class="btn btn-outline-primary btn-sm mb-3">
+                <i class="fas fa-download me-2"></i>Download Template
+              </a>
+              
+              <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Template Format</h6>
+              <div class="small text-muted">
+                <p><strong>Required fields:</strong></p>
+                <ul class="small">
+                  <li>name - Challenge title</li>
+                  <li>description - Challenge description</li>
+                  <li>category - Category name</li>
+                  <li>difficulty - Number 1-5</li>
+                  <li>points - Point value</li>
+                </ul>
+                
+                <p><strong>Optional fields:</strong></p>
+                <ul class="small">
+                  <li>flags - Array of flag objects</li>
+                  <li>hints - Array of hint objects</li>
+                  <li>is_visible - Boolean</li>
+                </ul>
+                
+                <p><strong>File Format:</strong></p>
+                <ul class="small">
+                  <li><strong>JSON:</strong> JSON file with challenge definitions</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Manage Categories Modal -->
+<div class="modal fade" id="manageCategoriesModal" tabindex="-1" aria-labelledby="manageCategoriesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="manageCategoriesModalLabel">Manage Categories</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if categories %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Color</th>
+                <th>Challenges</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for category in categories %}
+                <tr>
+                  <td>
+                    <span class="category-color-dot" style="background-color: {{ category.color }}"></span>
+                    {{ category.name }}
+                  </td>
+                  <td>
+                    <span class="color-code">{{ category.color }}</span>
+                  </td>
+                  <td>{{ category.challenge_count }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary edit-category" data-id="{{ category.id }}" data-name="{{ category.name }}" data-color="{{ category.color }}" data-description="{{ category.description }}">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning hide-category" data-id="{{ category.id }}" data-name="{{ category.name }}">
+                      <i class="fas fa-eye-slash"></i> Hide
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="alert alert-info">No categories defined yet.</div>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hide Challenge Confirmation Modal -->
+<div class="modal fade" id="deleteChallengeModal" tabindex="-1" aria-labelledby="deleteChallengeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteChallengeModalLabel">Hide Challenge</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to hide the challenge <strong id="challengeNameToDelete"></strong>?</p>
+        <p class="text-warning">The challenge will no longer be visible to participants, but can be made visible again later.</p>
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle me-2"></i>
+          <small>Note: Only Super Admins can permanently delete challenges.</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form id="deleteChallengeForm" method="post" action="">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning">Hide Challenge</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .dashboard-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  
+  .search-box {
+    position: relative;
+    width: 300px;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--dark-border);
+    background-color: var(--dark-card-alt);
+    color: var(--text-light);
+  }
+  
+  .search-box i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .category-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+  
+  .category-filter {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--dark-border);
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  
+  .category-filter:hover {
+    background-color: var(--dark-card-alt);
+  }
+  
+  .category-filter.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-white);
+    font-weight: 600;
+  }
+  
+  .category-filter:not(.active)[data-category]:not([data-category="all"]) {
+    border-left: 4px solid var(--category-color, var(--text-white));
+  }
+  
+  .category-filter .count {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+    font-weight: bold;
+  }
+  
+  .category-section {
+    margin-bottom: 30px;
+  }
+  
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .category-header h3 {
+    font-size: 1.3rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .category-color {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    margin-right: 10px;
+  }
+  
+  .challenge-count {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  
+  .challenges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  
+  .challenge-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 20px;
+  }
+  
+  .challenge-card.challenge-hidden {
+    opacity: 0.7;
+    border: 1px dashed #ffc107;
+  }
+  
+  .challenge-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  }  .challenge-card-header {
+    padding: 15px;
+    background-color: var(--dark-card-alt);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--dark-border);
+  }
+  
+  .challenge-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .challenge-points {
+    background-color: var(--accent-color);
+    color: var(--text-dark);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .challenge-card-body {
+    padding: 15px;
+  }
+  
+  .challenge-description {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    height: 60px;
+    overflow: hidden;
+  }
+  
+  .challenge-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .challenge-difficulty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .difficulty-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  
+  .difficulty-dots {
+    display: flex;
+    gap: 3px;
+  }
+  
+  .difficulty-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--dark-border);
+  }
+  
+  .difficulty-dot.active {
+    background-color: var(--primary-color);
+  }
+  
+  .challenge-solves {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  
+  .challenge-solves i {
+    color: var(--success-color);
+    margin-right: 5px;
+  }
+  
+  .challenge-card-footer {
+    padding: 10px 15px;
+    background-color: rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 50px 0;
+    color: var(--text-muted);
+  }
+  
+  .empty-state i {
+    color: var(--dark-border);
+  }
+  
+  .empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .category-color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .color-code {
+    font-family: monospace;
+    font-size: 0.9rem;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+  
+  /* Modal styling */
+  .modal-content {
+    background-color: var(--dark-card);
+    color: var(--text-light);
+    border: 1px solid var(--dark-border);
+  }
+  
+  .modal-header {
+    border-bottom-color: var(--dark-border);
+  }
+  
+  .modal-footer {
+    border-top-color: var(--dark-border);
+  }
+  
+  .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+  }
+  
+  /* Badge styling consistency */
+  .badge.bg-primary {
+    background-color: var(--light-color) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid var(--primary-color);
+  }
+  
+  .badge.bg-warning {
+    background-color: var(--light-color) !important;
+    color: var(--warning-color) !important;
+    border: 1px solid var(--warning-color);
+  }
+  
+  .badge.bg-success {
+    background-color: var(--light-color) !important;
+    color: var(--success-color) !important;
+    border: 1px solid var(--success-color);
+  }
+  
+  .badge.bg-danger {
+    background-color: var(--light-color) !important;
+    color: var(--danger-color) !important;
+    border: 1px solid var(--danger-color);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Filter challenges by category
+    const categoryFilters = document.querySelectorAll('.category-filter');
+    const challengeCards = document.querySelectorAll('.challenge-card');
+    const categorySections = document.querySelectorAll('.category-section');
+    
+    categoryFilters.forEach(filter => {
+      filter.addEventListener('click', function() {
+        const category = this.dataset.category;
+        
+        // Update active filter
+        categoryFilters.forEach(f => f.classList.remove('active'));
+        this.classList.add('active');
+        
+        if (category === 'all') {
+          // Show all challenges and categories
+          challengeCards.forEach(card => card.style.display = 'block');
+          categorySections.forEach(section => section.style.display = 'block');
+        } else {
+          // Show only challenges from the selected category
+          categorySections.forEach(section => {
+            if (section.id === `category-${category}`) {
+              section.style.display = 'block';
+            } else {
+              section.style.display = 'none';
+            }
+          });
+        }
+      });
+    });
+    
+    // Search challenges
+    const searchInput = document.getElementById('challengeSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        challengeCards.forEach(card => {
+          const title = card.querySelector('.challenge-title').textContent.toLowerCase();
+          const description = card.querySelector('.challenge-description').textContent.toLowerCase();
+          
+          if (title.includes(searchTerm) || description.includes(searchTerm)) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+        
+        // Hide empty categories
+        categorySections.forEach(section => {
+          const visibleChallenges = section.querySelectorAll('.challenge-card[style="display: block"]').length;
+          if (visibleChallenges === 0) {
+            section.style.display = 'none';
+          } else {
+            section.style.display = 'block';
+          }
+        });
+      });
+    }
+    
+    // Handle challenge deletion
+    const hideButtons = document.querySelectorAll('.hide-challenge');
+    const deleteChallengeModal = document.getElementById('deleteChallengeModal');
+    const challengeNameToDelete = document.getElementById('challengeNameToDelete');
+    const deleteChallengeForm = document.getElementById('deleteChallengeForm');
+    
+    hideButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const challengeId = this.dataset.id;
+        const challengeName = this.dataset.name;
+        
+        challengeNameToDelete.textContent = challengeName;
+        deleteChallengeForm.action = `/organizer/challenges/${challengeId}/hide/`;
+        
+        // Show the modal
+        const modal = new bootstrap.Modal(deleteChallengeModal);
+        modal.show();
+      });
+    });
+    
+    // Handle category form submission
+    const addCategoryForm = document.getElementById('addCategoryForm');
+    if (addCategoryForm) {
+      addCategoryForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(addCategoryForm);
+        const errorAlert = document.getElementById('categoryFormError');
+        errorAlert.classList.add('d-none');
+        
+        fetch(addCategoryForm.action, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value,
+          },
+          body: new URLSearchParams(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Refresh the page to show the new category
+            window.location.reload();
+          } else {
+            // Show error message
+            errorAlert.textContent = data.message || 'An error occurred while adding the category.';
+            errorAlert.classList.remove('d-none');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          errorAlert.textContent = 'An unexpected error occurred.';
+          errorAlert.classList.remove('d-none');
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}

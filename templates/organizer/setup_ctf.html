@@ -1,0 +1,388 @@
+{% extends "organizer/base.html" %}
+
+{% block dashboard_title %}Setup CTF{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3><i class="fas fa-rocket me-2"></i> Set Up Your CTF Event</h3>
+  </div>
+  <div class="card-body">
+    <div class="setup-container">
+      <div class="setup-intro text-center mb-5">
+        <img src="/static/img/ctf-setup.svg" alt="CTF Setup" class="setup-icon mb-4" style="width: 150px; height: auto;">
+        <h2>Welcome to DCTFd!</h2>
+        <p class="lead">Let's get your Capture The Flag competition set up.</p>
+      </div>
+      
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        
+        <div class="setup-section mb-5">
+          <h4 class="section-title"><i class="fas fa-info-circle me-2"></i> Basic Information</h4>
+          
+          <div class="mb-3">
+            <label for="{{ form.name.id_for_label }}" class="form-label">CTF Name *</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in form.name.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">Choose a name for your CTF event.</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.short_description.id_for_label }}" class="form-label">Short Description *</label>
+            {{ form.short_description }}
+            {% if form.short_description.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in form.short_description.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">A brief summary of your CTF (250 characters max).</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label">Full Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <div class="invalid-feedback d-block">
+                {% for error in form.description.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">Describe what your CTF is about and what participants can expect.</div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.logo.id_for_label }}" class="form-label">Logo</label>
+                {{ form.logo }}
+                {% if form.logo.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.logo.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Upload a logo for your CTF event. Recommended size: 200x200px.</div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.banner.id_for_label }}" class="form-label">Banner Image</label>
+                {{ form.banner }}
+                {% if form.banner.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.banner.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Upload a banner image. Recommended size: 1200x300px.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="setup-section mb-5">
+          <h4 class="section-title"><i class="fas fa-calendar-alt me-2"></i> Schedule</h4>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.start_time.id_for_label }}" class="form-label">Start Time *</label>
+                {{ form.start_time }}
+                {% if form.start_time.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.start_time.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">When your CTF will start.</div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.end_time.id_for_label }}" class="form-label">End Time *</label>
+                {{ form.end_time }}
+                {% if form.end_time.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.end_time.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">When your CTF will end.</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.registration_start.id_for_label }}" class="form-label">Registration Start *</label>
+                {{ form.registration_start }}
+                {% if form.registration_start.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.registration_start.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">When registration opens.</div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.registration_end.id_for_label }}" class="form-label">Registration End *</label>
+                {{ form.registration_end }}
+                {% if form.registration_end.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.registration_end.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">When registration closes.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="setup-section mb-5">
+          <h4 class="section-title"><i class="fas fa-cog me-2"></i> CTF Configuration</h4>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.status.id_for_label }}" class="form-label">Initial Status *</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.status.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Current status of the CTF.</div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.access.id_for_label }}" class="form-label">Access Control *</label>
+                {{ form.access }}
+                {% if form.access.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.access.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Who can access this CTF.</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.min_team_size.id_for_label }}" class="form-label">Minimum Team Size</label>
+                {{ form.min_team_size }}
+                {% if form.min_team_size.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.min_team_size.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Minimum number of members required per team.</div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.max_team_size.id_for_label }}" class="form-label">Maximum Team Size</label>
+                {{ form.max_team_size }}
+                {% if form.max_team_size.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.max_team_size.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Maximum number of members allowed per team.</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row mt-3">
+            <div class="col-md-4">
+              <div class="mb-3 form-check">
+                {{ form.is_visible }}
+                <label class="form-check-label" for="{{ form.is_visible.id_for_label }}">
+                  Event is visible in listings
+                </label>
+                {% if form.is_visible.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.is_visible.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">If checked, the event will be visible in public event listings.</div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3 form-check">
+                {{ form.scoreboard_visible }}
+                <label class="form-check-label" for="{{ form.scoreboard_visible.id_for_label }}">
+                  Scoreboard is visible
+                </label>
+                {% if form.scoreboard_visible.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.scoreboard_visible.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">If checked, the scoreboard will be visible to participants.</div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3 form-check">
+                {{ form.allow_individual_participants }}
+                <label class="form-check-label" for="{{ form.allow_individual_participants.id_for_label }}">
+                  Allow individual participants
+                </label>
+                {% if form.allow_individual_participants.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.allow_individual_participants.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">If checked, users can participate without a team.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="setup-actions text-center mt-5">
+          <button type="submit" class="btn btn-lg btn-primary px-5">
+            <i class="fas fa-rocket me-2"></i> Create CTF Event
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  .setup-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .setup-icon {
+    filter: drop-shadow(0 5px 15px rgba(0, 217, 191, 0.3));
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--gray-light);
+    color: var(--primary-color);
+  }
+  
+  .form-control, .form-select {
+    background-color: white;
+    border: 1px solid var(--gray-light);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: var(--text-dark);
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 217, 191, 0.2);
+  }
+  
+  textarea.form-control {
+    min-height: 120px;
+  }
+  
+  .form-check-input {
+    width: 20px;
+    height: 20px;
+    margin-top: 0.2rem;
+  }
+  
+  .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  
+  .form-check-label {
+    font-weight: 500;
+  }
+  
+  .form-text {
+    color: var(--gray);
+    font-size: 0.85rem;
+    margin-top: 5px;
+  }
+  
+  .setup-actions .btn {
+    transition: all 0.3s;
+  }
+  
+  .setup-actions .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 217, 191, 0.3);
+  }
+  
+  /* Dark Mode */
+  @media (prefers-color-scheme: dark) {
+    .form-control, .form-select {
+      background-color: var(--dark-card-alt);
+      border-color: var(--dark-border);
+      color: var(--text-light);
+    }
+    
+    .form-control:focus, .form-select:focus {
+      background-color: var(--dark-card-alt);
+      border-color: var(--primary-color);
+      color: var(--text-light);
+    }
+    
+    .section-title {
+      border-color: var(--dark-border);
+    }
+  }
+</style>
+{% endblock %}

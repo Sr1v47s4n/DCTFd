@@ -1,0 +1,160 @@
+{% extends "superadmin/base.html" %}
+
+{% block dashboard_title %}User Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3>All Users</h3>
+    <a href="{% url 'superadmin:create_user' %}" class="btn btn-primary">
+      <i class="fas fa-user-plus"></i> Create User
+    </a>
+  </div>
+  <div class="card-body">
+    <div class="filters mb-4">
+      <div class="row">
+        <div class="col-md-4">
+          <input type="text" class="form-control" id="searchUser" placeholder="Search by username or email">
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filterUserType">
+            <option value="">All User Types</option>
+            <option value="user">Regular Users</option>
+            <option value="organizer">Organizers</option>
+            <option value="admin">Admins</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filterUserStatus">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="banned">Banned</option>
+            <option value="unverified">Unverified Email</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-secondary w-100" id="resetFilters">Reset</button>
+        </div>
+      </div>
+    </div>
+    
+    {% if users %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Full Name</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+            <tr>
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.get_full_name }}</td>
+              <td>
+                {% if user.is_admin %}
+                  <span class="badge bg-danger">Admin</span>
+                {% elif user.is_organizer %}
+                  <span class="badge bg-warning">Organizer</span>
+                {% else %}
+                  <span class="badge bg-info">User</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if user.banned %}
+                  <span class="badge bg-danger">Banned</span>
+                {% elif not user.email_verified %}
+                  <span class="badge bg-warning">Unverified</span>
+                {% elif user.is_active %}
+                  <span class="badge bg-success">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+              <td>{{ user.date_joined|date:"M d, Y" }}</td>
+              <td>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userActionDropdown{{ user.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                    Actions
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="userActionDropdown{{ user.id }}">
+                    <li>
+                      <a class="dropdown-item" href="{% url 'superadmin:edit_user' user.id %}">
+                        <i class="fas fa-edit"></i> Edit
+                      </a>
+                    </li>
+                    {% if user.banned %}
+                      <li>
+                        <form method="post" action="#">
+                          {% csrf_token %}
+                          <input type="hidden" name="user_id" value="{{ user.id }}">
+                          <button type="submit" class="dropdown-item text-success" name="action" value="unban">
+                            <i class="fas fa-user-check"></i> Unban User
+                          </button>
+                        </form>
+                      </li>
+                    {% else %}
+                      <li>
+                        <form method="post" action="#">
+                          {% csrf_token %}
+                          <input type="hidden" name="user_id" value="{{ user.id }}">
+                          <button type="submit" class="dropdown-item text-warning" name="action" value="ban">
+                            <i class="fas fa-user-slash"></i> Ban User
+                          </button>
+                        </form>
+                      </li>
+                    {% endif %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}">
+                        <i class="fas fa-trash"></i> Delete
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">Confirm User Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>Are you sure you want to delete the user "{{ user.username }}"?</p>
+                        <p class="text-danger">This action cannot be undone and will remove all data associated with this user.</p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form method="post" action="#">
+                          {% csrf_token %}
+                          <input type="hidden" name="user_id" value="{{ user.id }}">
+                          <button type="submit" class="btn btn-danger" name="action" value="delete">Delete User</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="text-center p-5">
+        <p class="text-muted">No users found.</p>
+        <a href="{% url 'superadmin:create_user' %}" class="btn btn-primary">
+          <i class="fas fa-user-plus"></i> Create Your First User
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

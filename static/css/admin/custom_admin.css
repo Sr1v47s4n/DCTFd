@@ -1,0 +1,156 @@
+/* Custom Admin Styles */
+
+:root {
+    --dctfd-primary: #4a148c;
+    --dctfd-secondary: #7b1fa2;
+    --dctfd-accent: #e91e63;
+    --dctfd-light: #f3e5f5;
+    --dctfd-dark: #311b92;
+    --dctfd-success: #43a047;
+    --dctfd-warning: #ffb300;
+    --dctfd-danger: #e53935;
+    --dctfd-info: #039be5;
+}
+
+/* Header styles */
+#header {
+    background: var(--dctfd-primary);
+    color: white;
+}
+
+#header a:link, #header a:visited {
+    color: white;
+}
+
+div.breadcrumbs {
+    background: var(--dctfd-secondary);
+}
+
+/* Module styles */
+.module h2, .module caption, .inline-group h2 {
+    background: var(--dctfd-primary);
+}
+
+/* Button styles */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background: var(--dctfd-primary);
+}
+
+.button:active, input[type=submit]:active, input[type=button]:active,
+.button:focus, input[type=submit]:focus, input[type=button]:focus,
+.button:hover, input[type=submit]:hover, input[type=button]:hover {
+    background: var(--dctfd-dark);
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+    background: var(--dctfd-accent);
+}
+
+/* Development mode indicator */
+.dev-mode-indicator {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: var(--dctfd-warning);
+    color: black;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    z-index: 1000;
+    opacity: 0.9;
+}
+
+/* Fieldset styles */
+.fieldset-main {
+    border-left: 5px solid var(--dctfd-primary);
+    padding-left: 10px;
+}
+
+.fieldset-advanced {
+    border-left: 5px solid var(--dctfd-info);
+    padding-left: 10px;
+}
+
+.fieldset-security {
+    border-left: 5px solid var(--dctfd-danger);
+    padding-left: 10px;
+}
+
+/* Dashboard styles */
+.dashboard .module table th {
+    width: auto;
+}
+
+/* Form styles */
+.aligned label {
+    width: 180px;
+}
+
+.wide label {
+    width: 240px;
+}
+
+/* Status indicators */
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-dot.active {
+    background-color: var(--dctfd-success);
+}
+
+.status-dot.inactive {
+    background-color: var(--dctfd-danger);
+}
+
+.status-dot.pending {
+    background-color: var(--dctfd-warning);
+}
+
+/* Data table enhancements */
+.results table tbody tr:hover td, .results table tbody tr:hover th {
+    background-color: var(--dctfd-light);
+}
+
+/* Custom help text styling */
+.help {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .aligned label {
+        width: 150px;
+    }
+    
+    .wide label {
+        width: 200px;
+    }
+}
+
+@media (max-width: 767px) {
+    .aligned label {
+        width: 100%;
+        display: block;
+    }
+    
+    .aligned .form-row input, 
+    .aligned .form-row select, 
+    .aligned .form-row textarea {
+        width: 100%;
+    }
+}
+
+/* Custom field styles */
+.field-is_active .status-dot,
+.field-is_public .status-dot,
+.field-is_staff .status-dot,
+.field-is_superuser .status-dot {
+    margin-top: 4px;
+}

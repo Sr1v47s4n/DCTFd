@@ -1,0 +1,150 @@
+{% extends "superadmin/base.html" %}
+
+{% block dashboard_title %}System Settings{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3>Platform Settings</h3>
+  </div>
+  <div class="card-body">
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+      
+      <h4 class="mb-3">General Settings</h4>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="platform_name" class="form-label">Platform Name</label>
+          <input type="text" class="form-control" id="platform_name" name="platform_name" value="DCTFd" required>
+        </div>
+        <div class="col-md-6">
+          <label for="platform_url" class="form-label">Platform URL</label>
+          <input type="url" class="form-control" id="platform_url" name="platform_url" value="http://localhost:8001" required>
+        </div>
+      </div>
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="platform_description" class="form-label">Platform Description</label>
+          <textarea class="form-control" id="platform_description" name="platform_description" rows="3">A Django-based CTF Platform</textarea>
+        </div>
+        <div class="col-md-6">
+          <label for="platform_contact_email" class="form-label">Contact Email</label>
+          <input type="email" class="form-control" id="platform_contact_email" name="platform_contact_email" value="admin@example.com" required>
+        </div>
+      </div>
+      
+      <h4 class="mb-3 mt-4">Email Settings</h4>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="email_host" class="form-label">SMTP Host</label>
+          <input type="text" class="form-control" id="email_host" name="email_host" value="smtp.example.com">
+        </div>
+        <div class="col-md-6">
+          <label for="email_port" class="form-label">SMTP Port</label>
+          <input type="number" class="form-control" id="email_port" name="email_port" value="587">
+        </div>
+      </div>
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="email_user" class="form-label">SMTP Username</label>
+          <input type="text" class="form-control" id="email_user" name="email_user" value="">
+        </div>
+        <div class="col-md-6">
+          <label for="email_password" class="form-label">SMTP Password</label>
+          <input type="password" class="form-control" id="email_password" name="email_password" value="">
+        </div>
+      </div>
+      
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" value="1" id="email_use_tls" name="email_use_tls" checked>
+        <label class="form-check-label" for="email_use_tls">
+          Use TLS
+        </label>
+      </div>
+      
+      <h4 class="mb-3 mt-4">Security Settings</h4>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="allowed_hosts" class="form-label">Allowed Hosts (comma separated)</label>
+          <input type="text" class="form-control" id="allowed_hosts" name="allowed_hosts" value="localhost,127.0.0.1">
+        </div>
+        <div class="col-md-6">
+          <label for="session_cookie_age" class="form-label">Session Cookie Age (seconds)</label>
+          <input type="number" class="form-control" id="session_cookie_age" name="session_cookie_age" value="86400">
+        </div>
+      </div>
+      
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" value="1" id="debug_mode" name="debug_mode" checked>
+        <label class="form-check-label" for="debug_mode">
+          Debug Mode (not recommended for production)
+        </label>
+      </div>
+      
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" value="1" id="secure_cookies" name="secure_cookies">
+        <label class="form-check-label" for="secure_cookies">
+          Secure Cookies (requires HTTPS)
+        </label>
+      </div>
+      
+      <h4 class="mb-3 mt-4">Custom Fields Settings</h4>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" value="1" id="enable_user_custom_fields" name="enable_user_custom_fields" checked>
+            <label class="form-check-label" for="enable_user_custom_fields">
+              Enable Custom Fields for User Registration
+            </label>
+            <div class="form-text">Display custom fields on user registration forms</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" value="1" id="enable_team_custom_fields" name="enable_team_custom_fields" checked>
+            <label class="form-check-label" for="enable_team_custom_fields">
+              Enable Custom Fields for Team Creation
+            </label>
+            <div class="form-text">Display custom fields on team creation forms</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="alert alert-info">
+        <div class="d-flex">
+          <div class="me-3">
+            <i class="fas fa-info-circle fa-2x"></i>
+          </div>
+          <div>
+            <p class="mb-1">Custom fields allow you to collect additional information from users and teams.</p>
+            <p class="mb-0">You can <a href="{% url 'superadmin:custom_fields' %}">manage your custom fields here</a>.</p>
+          </div>
+        </div>
+      </div>
+      
+      <h4 class="mb-3 mt-4">Platform Appearance</h4>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="theme" class="form-label">Theme</label>
+          <select class="form-select" id="theme" name="theme">
+            <option value="default" selected>Default</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label for="logo" class="form-label">Logo</label>
+          <input type="file" class="form-control" id="logo" name="logo">
+        </div>
+      </div>
+      
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+        <button type="reset" class="btn btn-secondary">Reset</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

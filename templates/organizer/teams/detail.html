@@ -1,0 +1,391 @@
+{% extends "organizer/base.html" %}
+
+{% block dashboard_title %}Team Details{% endblock %}
+
+{% block extra_css %}
+<style>
+  .team-header {
+    background: linear-gradient(135deg, #4e31aa 0%, #6545c9 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .team-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid white;
+    margin-bottom: 15px;
+  }
+  
+  .team-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  
+  .team-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+  }
+  
+  .team-stat {
+    text-align: center;
+  }
+  
+  .team-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: block;
+  }
+  
+  .team-stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+  
+  .section-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
+    overflow: hidden;
+  }
+  
+  .section-header {
+    background: #f8f9fa;
+    padding: 20px 25px;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #4e31aa;
+    margin: 0;
+  }
+  
+  .section-body {
+    padding: 25px;
+  }
+  
+  .member-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+  }
+  
+  .member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+    background: #4e31aa;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+  
+  .member-info h6 {
+    margin: 0;
+    color: #2c2c2c;
+    font-weight: 600;
+  }
+  
+  .member-info p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+  
+  .member-role {
+    margin-left: auto;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .role-captain {
+    background: #e7f3ff;
+    color: #0066cc;
+  }
+  
+  .role-member {
+    background: #f0f0f0;
+    color: #666;
+  }
+  
+  .submission-item {
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: white;
+  }
+  
+  .submission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .challenge-name {
+    font-weight: 600;
+    color: #4e31aa;
+  }
+  
+  .submission-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .status-correct {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .status-incorrect {
+    background: #f8d7da;
+    color: #721c24;
+  }
+  
+  .submission-content {
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+    color: #2c2c2c;
+    border: 1px solid #dee2e6;
+  }
+  
+  .submission-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+  
+  .solved-challenge {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .solved-challenge i {
+    margin-right: 10px;
+    color: #28a745;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+  }
+  
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #dee2e6;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="team-header">
+  {% if team.logo %}
+    <img src="{{ team.logo.url }}" alt="{{ team.name }}" class="team-logo">
+  {% else %}
+    <div class="team-logo" style="background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700;">
+      {{ team.name|first|upper }}
+    </div>
+  {% endif %}
+  
+  <h1 class="team-name">{{ team.name }}</h1>
+  <p style="margin: 0; opacity: 0.9;">{{ team.description|default:"No description provided" }}</p>
+  
+  <div class="team-stats">
+    <div class="team-stat">
+      <span class="team-stat-value">{{ members.count }}</span>
+      <span class="team-stat-label">Member{{ members.count|pluralize }}</span>
+    </div>
+    <div class="team-stat">
+      <span class="team-stat-value">{{ team.score|default:0 }}</span>
+      <span class="team-stat-label">Points</span>
+    </div>
+    <div class="team-stat">
+      <span class="team-stat-value">{{ solved_challenges.count }}</span>
+      <span class="team-stat-label">Solved</span>
+    </div>
+    <div class="team-stat">
+      <span class="team-stat-value">{{ submissions.count }}</span>
+      <span class="team-stat-label">Submission{{ submissions.count|pluralize }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <!-- Team Members -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="fas fa-users me-2"></i>
+          Team Members
+        </h3>
+      </div>
+      <div class="section-body">
+        {% if members %}
+          {% for member in members %}
+            <div class="member-card">
+              <div class="member-avatar">
+                {{ member.username|first|upper }}
+              </div>
+              <div class="member-info">
+                <h6>{{ member.get_display_name }}</h6>
+                <p>{{ member.email }}</p>
+              </div>
+              <span class="member-role {% if member == team.captain %}role-captain{% else %}role-member{% endif %}">
+                {% if member == team.captain %}Captain{% else %}Member{% endif %}
+              </span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <i class="fas fa-user-slash"></i>
+            <p>No members found</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <!-- Solved Challenges -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="fas fa-trophy me-2"></i>
+          Solved Challenges
+        </h3>
+      </div>
+      <div class="section-body">
+        {% if solved_challenges %}
+          {% for challenge in solved_challenges %}
+            <div class="solved-challenge">
+              <i class="fas fa-check-circle"></i>
+              <span>{{ challenge.name }}</span>
+              <span class="ms-auto badge bg-primary">{{ challenge.value }} pts</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <i class="fas fa-flag"></i>
+            <p>No challenges solved yet</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <!-- Recent Submissions -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="fas fa-paper-plane me-2"></i>
+          Recent Submissions
+        </h3>
+      </div>
+      <div class="section-body">
+        {% if submissions %}
+          {% for submission in submissions|slice:":10" %}
+            <div class="submission-item">
+              <div class="submission-header">
+                <span class="challenge-name">{{ submission.challenge.name }}</span>
+                <span class="submission-status {% if submission.is_correct %}status-correct{% else %}status-incorrect{% endif %}">
+                  {% if submission.is_correct %}
+                    <i class="fas fa-check"></i> Correct
+                  {% else %}
+                    <i class="fas fa-times"></i> Incorrect
+                  {% endif %}
+                </span>
+              </div>
+              
+              <div class="submission-content">
+                {{ submission.flag_submitted|truncatechars:50 }}
+              </div>
+              
+              <div class="submission-meta">
+                <span>by {{ submission.user.get_display_name }}</span>
+                <span>{{ submission.submitted_at|timesince }} ago</span>
+              </div>
+            </div>
+          {% endfor %}
+          
+          {% if submissions.count > 10 %}
+            <div class="text-center mt-3">
+              <a href="{% url 'organizer:submissions' %}?team={{ team.id }}" class="btn btn-outline-primary">
+                View All Submissions
+              </a>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No submissions yet</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Actions -->
+<div class="d-flex justify-content-between align-items-center mt-4">
+  <a href="{% url 'organizer:teams' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i>
+    Back to Teams
+  </a>
+  
+  <div>
+    <a href="{% url 'organizer:submissions' %}?team={{ team.id }}" class="btn btn-outline-primary me-2">
+      <i class="fas fa-list me-2"></i>
+      View All Submissions
+    </a>
+    <button class="btn btn-outline-danger" onclick="confirmAction('Are you sure you want to disqualify this team?', '{% url 'organizer:team_disqualify' team.id %}')">
+      <i class="fas fa-ban me-2"></i>
+      Disqualify Team
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmAction(message, url) {
+  if (confirm(message)) {
+    window.location.href = url;
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>New User Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        .user-info {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>New User Registration</h2>
+        </div>
+        
+        <p>Hello Administrator,</p>
+        
+        <p>A new user has registered on the DCTFd platform.</p>
+        
+        <div class="user-info">
+            <h3>User Details</h3>
+            <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Phone:</strong> {{ user.phone }}</p>
+            <p><strong>Country:</strong> {{ user.get_country_display }}</p>
+            <p><strong>Registered:</strong> {{ user.date_joined|date:"F j, Y, g:i a" }}</p>
+        </div>
+        
+        <p style="text-align: center;">
+            <a href="{{ protocol }}://{{ domain }}{% url 'admin:users_user_change' user.id %}" class="button">View User Profile</a>
+        </p>
+        
+        <p>This is an automated notification.</p>
+        
+        <div class="footer">
+            <p>&copy; {% now "Y" %} DCTFd. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

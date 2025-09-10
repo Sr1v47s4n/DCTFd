@@ -1,0 +1,187 @@
+{% extends "superadmin/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block dashboard_title %}
+  {% if form.instance.id %}
+    {% trans "Edit Custom Field" %}
+  {% else %}
+    {% trans "Create Custom Field" %}
+  {% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">
+      {% if form.instance.id %}
+        {% trans "Edit Custom Field" %}
+      {% else %}
+        {% trans "Create Custom Field" %}
+      {% endif %}
+    </h5>
+  </div>
+  <div class="card-body">
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+      
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {% for error in form.non_field_errors %}
+            {{ error }}
+          {% endfor %}
+        </div>
+      {% endif %}
+      
+      <div class="mb-3">
+        <label for="{{ form.field_type.id_for_label }}" class="form-label">{{ form.field_type.label }}</label>
+        {{ form.field_type }}
+        {% if form.field_type.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.field_type.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">{% trans "The type of field to display in the form." %}</div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="{{ form.field_for.id_for_label }}" class="form-label">{{ form.field_for.label }}</label>
+        {{ form.field_for }}
+        {% if form.field_for.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.field_for.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">{% trans "Where this field should appear (user registration or team creation)." %}</div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="{{ form.label.id_for_label }}" class="form-label">{{ form.label.label }}</label>
+        {{ form.label }}
+        {% if form.label.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.label.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">{% trans "The label that will be displayed to users." %}</div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.description.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">{% trans "Optional help text that will be displayed below the field." %}</div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="{{ form.placeholder.id_for_label }}" class="form-label">{{ form.placeholder.label }}</label>
+        {{ form.placeholder }}
+        {% if form.placeholder.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.placeholder.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">{% trans "Optional placeholder text for text-based fields." %}</div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="{{ form.options.id_for_label }}" class="form-label">{{ form.options.label }}</label>
+        {{ form.options }}
+        {% if form.options.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.options.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">{% trans "For dropdown, radio, or checkbox fields. Enter one option per line." %}</div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="{{ form.required.id_for_label }}" class="form-label">{{ form.required.label }}</label>
+        <div>
+          {{ form.required }}
+          {% if form.required.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.required.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="{{ form.order.id_for_label }}" class="form-label">{{ form.order.label }}</label>
+        {{ form.order }}
+        {% if form.order.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.order.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">{% trans "The order in which this field appears in the form. Lower numbers appear first." %}</div>
+      </div>
+      
+      {{ form.content_type }}
+      {{ form.object_id }}
+      
+      <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'superadmin:custom_fields' %}" class="btn btn-secondary">
+          <i class="fas fa-arrow-left me-1"></i> {% trans "Back to List" %}
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save me-1"></i> {% trans "Save Field" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const fieldTypeSelect = document.getElementById('{{ form.field_type.id_for_label }}');
+    const optionsField = document.getElementById('{{ form.options.id_for_label }}').closest('.mb-3');
+    const placeholderField = document.getElementById('{{ form.placeholder.id_for_label }}').closest('.mb-3');
+    
+    function updateFieldVisibility() {
+      const fieldType = fieldTypeSelect.value;
+      
+      // Show options for select, radio, checkbox
+      if (['select', 'radio', 'checkbox'].includes(fieldType)) {
+        optionsField.style.display = 'block';
+      } else {
+        optionsField.style.display = 'none';
+      }
+      
+      // Show placeholder for text, email, number, url, textarea
+      if (['text', 'email', 'number', 'url', 'textarea'].includes(fieldType)) {
+        placeholderField.style.display = 'block';
+      } else {
+        placeholderField.style.display = 'none';
+      }
+    }
+    
+    // Initial setup
+    updateFieldVisibility();
+    
+    // Update when field type changes
+    fieldTypeSelect.addEventListener('change', updateFieldVisibility);
+  });
+</script>
+{% endblock %}

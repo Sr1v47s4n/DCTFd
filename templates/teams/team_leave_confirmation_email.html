@@ -1,0 +1,14 @@
+{% extends "email/base_email.html" %}
+
+{% block email_title %}Team Membership Update{% endblock %}
+
+{% block email_content %}
+<p>Hello {{ user.username }},</p>
+
+<p>This email confirms that you have left the team <strong>{{ team_name }}</strong> on DCTFd.</p>
+
+<p>If you would like to join another team or create your own team, you can do so from your <a href="{{ protocol|default:'http' }}://{{ domain }}{% url 'users:profile' %}">profile page</a>.</p>
+
+<p>Thank you,<br>
+The DCTFd Team</p>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "email/base_email.html" %}
+
+{% block email_title %}Account Status Update{% endblock %}
+
+{% block email_content %}
+<p>Hello {{ user.username }},</p>
+
+{% if status_type == 'banned' %}
+<p>We regret to inform you that your account has been suspended from DCTFd.</p>
+{% if reason %}
+<p><strong>Reason:</strong> {{ reason }}</p>
+{% endif %}
+<p>If you believe this is an error, please contact the administrators for assistance.</p>
+
+{% elif status_type == 'unbanned' %}
+<p>Good news! Your account has been reactivated and you can now access DCTFd again.</p>
+<p>You can log in to your account <a href="{{ protocol|default:'http' }}://{{ domain }}{% url 'users:login' %}">here</a>.</p>
+
+{% elif status_type == 'disabled' %}
+<p>Your account has been disabled on DCTFd.</p>
+{% if reason %}
+<p><strong>Reason:</strong> {{ reason }}</p>
+{% endif %}
+<p>If you have questions, please contact the administrators for assistance.</p>
+
+{% elif status_type == 'enabled' %}
+<p>Your account has been enabled on DCTFd.</p>
+<p>You can log in to your account <a href="{{ protocol|default:'http' }}://{{ domain }}{% url 'users:login' %}">here</a>.</p>
+
+{% else %}
+<p>There has been a change to your account status: <strong>{{ status_type }}</strong></p>
+{% if reason %}
+<p><strong>Details:</strong> {{ reason }}</p>
+{% endif %}
+{% endif %}
+
+<p>If you did not expect this change or have any questions, please contact our support team.</p>
+
+<p>Thank you,<br>
+The DCTFd Team</p>
+{% endblock %}

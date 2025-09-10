@@ -1,0 +1,109 @@
+{% extends 'organizer/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block dashboard_title %}{% trans "Users" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0"><i class="fas fa-users me-2"></i>{% trans "Users Management" %}</h5>
+          <div>
+            <a href="#" class="btn btn-primary btn-sm">
+              <i class="fas fa-download me-1"></i> {% trans "Export" %}
+            </a>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if users %}
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>{% trans "Username" %}</th>
+                    <th>{% trans "Email" %}</th>
+                    <th>{% trans "Team" %}</th>
+                    <th>{% trans "Joined" %}</th>
+                    <th>{% trans "Last Login" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for user in users %}
+                    <tr>
+                      <td>
+                        {{ user.username }}
+                      </td>
+                      <td>{{ user.email }}</td>
+                      <td>
+                        {% if user.team %}
+                          <a href="{% url 'organizer:team_detail' user.team.id %}">{{ user.team.name }}</a>
+                        {% else %}
+                          {% trans "No Team" %}
+                        {% endif %}
+                      </td>
+                      <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                      <td>{{ user.last_login|default:"Never"|date:"M d, Y H:i" }}</td>
+                      <td>
+                        {% if user.is_active %}
+                          <span class="badge bg-success">{% trans "Active" %}</span>
+                        {% else %}
+                          <span class="badge bg-danger">{% trans "Inactive" %}</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="btn-group">
+                          <button type="button" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                          </button>
+                          <button type="button" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-lock"></i>
+                          </button>
+                          <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                        
+                        <!-- Delete Modal -->
+                        <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">{% trans "Delete User" %}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                {% trans "Are you sure you want to delete the user" %} <strong>{{ user.username }}</strong>?
+                                <p class="text-danger mt-2">{% trans "This action cannot be undone." %}</p>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                                <form method="post" action="#">
+                                  {% csrf_token %}
+                                  <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>{% trans "No users have registered yet." %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

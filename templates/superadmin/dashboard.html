@@ -1,0 +1,181 @@
+{% extends "superadmin/base.html" %}
+
+{% block dashboard_title %}Admin Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<div class="quick-actions">
+  <a href="{% url 'superadmin:users' %}" class="quick-action-btn">
+    <i class="fas fa-users"></i> Manage Users
+  </a>
+  <a href="{% url 'superadmin:organizers' %}" class="quick-action-btn">
+    <i class="fas fa-user-shield"></i> Manage Organizers
+  </a>
+  <a href="{% url 'superadmin:settings' %}" class="quick-action-btn">
+    <i class="fas fa-sliders"></i> System Settings
+  </a>
+</div>
+
+<div class="dashboard-stats">
+  <div class="stat-card">
+    <i class="fas fa-users fa-2x mb-3" style="color: var(--primary-color);"></i>
+    <div class="stat-value">{{ user_count }}</div>
+    <div class="stat-label">Total Users</div>
+  </div>
+  <div class="stat-card">
+    <i class="fas fa-user-shield fa-2x mb-3" style="color: var(--primary-color);"></i>
+    <div class="stat-value">{{ organizer_count }}</div>
+    <div class="stat-label">Organizers</div>
+  </div>
+  <div class="stat-card">
+    <i class="fas fa-user-cog fa-2x mb-3" style="color: var(--primary-color);"></i>
+    <div class="stat-value">{{ admin_count }}</div>
+    <div class="stat-label">Admins</div>
+  </div>
+  <div class="stat-card">
+    <i class="fas fa-users-gear fa-2x mb-3" style="color: var(--primary-color);"></i>
+    <div class="stat-value">{{ team_count }}</div>
+    <div class="stat-label">Teams</div>
+  </div>
+  
+</div>
+
+<div class="dashboard-row">
+  <div class="dashboard-col">
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-gauge-high me-2"></i> System Status</h3>
+      </div>
+      <div class="card-body">
+        <div class="system-status">
+          <div class="status-item">
+            <span class="status-label">Platform:</span>
+            <span class="status-value">
+              <span class="badge bg-success">Operational</span>
+            </span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Database:</span>
+            <span class="status-value">
+              <span class="badge bg-success">Connected</span>
+            </span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Cache:</span>
+            <span class="status-value">
+              <span class="badge bg-success">Running</span>
+            </span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Storage:</span>
+            <span class="status-value">
+              <span class="badge bg-success">Available</span>
+            </span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Session:</span>
+            <span class="status-value">
+              <span class="badge bg-success">Active</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-server me-2"></i> System Information</h3>
+      </div>
+      <div class="card-body">
+        <div class="system-info">
+          <div class="info-item">
+            <span class="info-label">Django Version:</span>
+            <span class="info-value">4.2.7</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Python Version:</span>
+            <span class="info-value">3.12.0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Platform:</span>
+            <span class="info-value">DCTFd 1.0</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Database:</span>
+            <span class="info-value">SQLite 3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-col">
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-user-plus me-2"></i> Recent User Registrations</h3>
+        <a href="{% url 'superadmin:users' %}" class="btn btn-sm btn-primary">View All</a>
+      </div>
+      <div class="card-body">
+        {% if recent_users %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Joined</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in recent_users %}
+                <tr>
+                  <td>{{ user.get_full_name }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                  <td>
+                    {% if user.is_admin %}
+                      <span class="badge bg-primary">Admin</span>
+                    {% elif user.is_organizer %}
+                      <span class="badge bg-info">Organizer</span>
+                    {% else %}
+                      <span class="badge bg-secondary">User</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="alert alert-info">No recent user registrations.</div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-chart-line me-2"></i> Activity Summary</h3>
+      </div>
+      <div class="card-body">
+        <div class="system-status">
+          <div class="status-item">
+            <span class="status-label">Total Challenges:</span>
+            <span class="status-value">{{ challenge_count }}</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Total Submissions:</span>
+            <span class="status-value">{{ submission_count }}</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Current Event:</span>
+            <span class="status-value">{{ event_count }}</span>
+          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <a href="{% url 'superadmin:statistics' %}" class="btn btn-primary">
+            <i class="fas fa-chart-pie me-2"></i> View Detailed Statistics
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

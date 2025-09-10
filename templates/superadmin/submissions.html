@@ -1,0 +1,239 @@
+{% extends "superadmin/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Flag Submissions | Admin Dashboard{% endblock %}
+
+{% block dashboard_title %}Flag Submissions{% endblock %}
+
+{% block dashboard_content %}
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="stat-card bg-primary text-white">
+      <div class="stat-value">{{ total_count }}</div>
+      <div class="text-white" style="text-transform: uppercase;">Total Submissions</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card bg-success text-white">
+      <div class="stat-value">{{ correct_count }}</div>
+      <div class="stat-label">Correct Submissions</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card bg-danger text-white">
+      <div class="stat-value">{{ incorrect_count }}</div>
+      <div class="stat-label">Incorrect Submissions</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card bg-info text-white">
+      <div class="stat-value">{{ success_rate }}%</div>
+      <div class="stat-label">Success Rate</div>
+    </div>
+  </div>
+</div>
+
+<div class="card dashboard-card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="fas fa-filter me-2"></i> Filter Submissions</h5>
+  </div>
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      <div class="col-md-6 col-lg-3">
+        <label for="user" class="form-label">User</label>
+        <input type="text" class="form-control" id="user" name="user" value="{{ user_filter }}" placeholder="Username or email">
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <label for="team" class="form-label">Team</label>
+        <input type="text" class="form-control" id="team" name="team" value="{{ team_filter }}" placeholder="Team name">
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <label for="challenge" class="form-label">Challenge</label>
+        <input type="text" class="form-control" id="challenge" name="challenge" value="{{ challenge_filter }}" placeholder="Challenge or category">
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <label for="status" class="form-label">Status</label>
+        <select class="form-select" id="status" name="status">
+          <option value="" {% if not status_filter %}selected{% endif %}>All</option>
+          <option value="correct" {% if status_filter == 'correct' %}selected{% endif %}>Correct</option>
+          <option value="incorrect" {% if status_filter == 'incorrect' %}selected{% endif %}>Incorrect</option>
+        </select>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <label for="date_from" class="form-label">From Date</label>
+        <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from|date:'Y-m-d' }}">
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <label for="date_to" class="form-label">To Date</label>
+        <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to|date:'Y-m-d' }}">
+      </div>
+      <div class="col-12">
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search me-1"></i> Filter
+          </button>
+          <a href="{% url 'superadmin:submissions' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-undo me-1"></i> Reset
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card dashboard-card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><i class="fas fa-flag me-2"></i> Submissions</h5>
+    <span class="badge bg-primary">{{ page_obj.paginator.count }} results</span>
+  </div>
+  <div class="card-body">
+    {% if page_obj %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th scope="col">Time</th>
+              <th scope="col">User</th>
+              <th scope="col">Team</th>
+              <th scope="col">Challenge</th>
+              <th scope="col">Category</th>
+              <th scope="col">Flag Submitted</th>
+              <th scope="col">IP Address</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for submission in page_obj %}
+              <tr>
+                <td>{{ submission.submitted_at|date:"M d, Y H:i:s" }}</td>
+                <td>
+                  <a href="{% url 'superadmin:edit_user' submission.user.id %}">
+                    {{ submission.user.username }}
+                  </a>
+                </td>
+                <td>
+                  {% if submission.team %}
+                    {{ submission.team.name }}
+                  {% else %}
+                    <span class="text-muted">No team</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'superadmin:challenge_detail' submission.challenge.id %}">
+                    {{ submission.challenge.name }}
+                  </a>
+                </td>
+                <td>
+                  {% if submission.challenge.category %}
+                    <span class="badge" style="background-color: {{ submission.challenge.category.color|default:'#6c757d' }}">
+                      {{ submission.challenge.category.name }}
+                    </span>
+                  {% else %}
+                    <span class="badge bg-secondary">No category</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <code>{{ submission.flag_submitted|truncatechars:20 }}</code>
+                </td>
+                <td>
+                  {% if submission.ip_address %}
+                    <small>{{ submission.ip_address }}</small>
+                  {% else %}
+                    <span class="text-muted">Unknown</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if submission.is_correct %}
+                    <span class="badge bg-success">Correct</span>
+                  {% else %}
+                    <span class="badge bg-danger">Incorrect</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      {% if page_obj.paginator.num_pages > 1 %}
+        <nav aria-label="Submissions pagination" class="mt-4">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
+                  <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <a class="page-link" href="#" aria-label="First">
+                  <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+              </li>
+              <li class="page-item disabled">
+                <a class="page-link" href="#" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
+                  <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled">
+                <a class="page-link" href="#" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+              <li class="page-item disabled">
+                <a class="page-link" href="#" aria-label="Last">
+                  <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+        <h4>No submissions found</h4>
+        <p class="text-muted">Try adjusting your filters or check back later</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add any JavaScript needed for the submissions page
+  });
+</script>
+{% endblock %}

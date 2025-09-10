@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'css/admin/custom_admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        DCTFd Administration
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+{% if request.dev_mode %}
+<div class="dev-mode-indicator">
+    Development Mode
+</div>
+{% endif %}
+{% endblock %}

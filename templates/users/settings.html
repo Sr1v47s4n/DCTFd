@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Settings | DCTFd{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Account Settings</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="#profile" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center active" data-bs-toggle="pill">
+                        Profile Information
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                    <a href="#security" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="pill">
+                        Security
+                        <i class="fas fa-shield-alt"></i>
+                    </a>
+                    <a href="#appearance" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="pill">
+                        Appearance
+                        <i class="fas fa-palette"></i>
+                    </a>
+                    <a href="#notifications" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-bs-toggle="pill">
+                        Notifications
+                        <i class="fas fa-bell"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/account/password/change/" class="btn btn-outline-primary">
+                            <i class="fas fa-key me-2"></i> Change Password
+                        </a>
+                        {% if two_factor_enabled %}
+                            <a href="/account/2fa/disable" class="btn btn-outline-danger">
+                                <i class="fas fa-lock-open me-2"></i> Disable 2FA
+                            </a>
+                        {% else %}
+                            <a href="/account/2fa/" class="btn btn-outline-success">
+                                <i class="fas fa-lock me-2"></i> Enable 2FA
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content -->
+        <div class="col-lg-9">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="tab-content">
+                <!-- Profile Information -->
+                <div class="tab-pane fade show active" id="profile">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Profile Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                                        {{ form.username }}
+                                        <div class="form-text text-muted">Username cannot be changed.</div>
+                                        {% if form.username.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.username.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                        {{ form.email }}
+                                        <div class="form-text text-muted">Email address cannot be changed.</div>
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.email.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.first_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.last_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label">Phone Number</label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.phone.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ form.country.id_for_label }}" class="form-label">Country</label>
+                                        {{ form.country }}
+                                        {% if form.country.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.country.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                                    {{ form.gender }}
+                                    {% if form.gender.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.gender.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.affiliation.id_for_label }}" class="form-label">Affiliation</label>
+                                    {{ form.affiliation }}
+                                    <div class="form-text text-muted">Organization, school, or company</div>
+                                    {% if form.affiliation.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.affiliation.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.bio.id_for_label }}" class="form-label">Biography</label>
+                                    {{ form.bio }}
+                                    <div class="form-text text-muted">Tell others about yourself</div>
+                                    {% if form.bio.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.bio.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.website.id_for_label }}" class="form-label">Website</label>
+                                    {{ form.website }}
+                                    {% if form.website.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.website.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.avatar.id_for_label }}" class="form-label">Profile Picture</label>
+                                    {{ form.avatar }}
+                                    {% if user.avatar %}
+                                        <div class="mt-2">
+                                            <img src="{{ user.avatar.url }}" alt="Current avatar" class="img-thumbnail" style="max-height: 100px;">
+                                        </div>
+                                    {% endif %}
+                                    {% if form.avatar.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.avatar.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    {{ form.hidden }}
+                                    <label class="form-check-label" for="{{ form.hidden.id_for_label }}">
+                                        Hide profile from public listings
+                                    </label>
+                                    {% if form.hidden.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.hidden.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>Social Links</h5>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="{{ form.discord_id.id_for_label }}" class="form-label">
+                                                <i class="fab fa-discord me-2"></i> Discord ID
+                                            </label>
+                                            {{ form.discord_id }}
+                                            {% if form.discord_id.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.discord_id.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label for="{{ form.github_username.id_for_label }}" class="form-label">
+                                                <i class="fab fa-github me-2"></i> GitHub Username
+                                            </label>
+                                            {{ form.github_username }}
+                                            {% if form.github_username.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.github_username.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label for="{{ form.twitter_username.id_for_label }}" class="form-label">
+                                                <i class="fab fa-twitter me-2"></i> Twitter Username
+                                            </label>
+                                            {{ form.twitter_username }}
+                                            {% if form.twitter_username.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.twitter_username.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label for="{{ form.linkedin_profile.id_for_label }}" class="form-label">
+                                                <i class="fab fa-linkedin me-2"></i> LinkedIn Profile
+                                            </label>
+                                            {{ form.linkedin_profile }}
+                                            {% if form.linkedin_profile.errors %}
+                                                <div class="invalid-feedback d-block">{{ form.linkedin_profile.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Settings -->
+                <div class="tab-pane fade" id="security">
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Security Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h5>Password</h5>
+                                <p>Your password was last changed on: <strong>{{ user.last_password_change|default:"Never" }}</strong></p>
+                                <div class="d-grid gap-2">
+                                    <a href="/account/password/change/" class="btn btn-primary">
+                                        <i class="fas fa-key me-2"></i> Change Password
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h5>Two-Factor Authentication</h5>
+                                {% if two_factor_enabled %}
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-lock me-2"></i> Two-factor authentication is enabled on your account.
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'users:two_factor_disable' %}" class="btn btn-danger">
+                                            <i class="fas fa-lock-open me-2"></i> Disable Two-Factor Authentication
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-unlock me-2"></i> Your account is not protected with two-factor authentication.
+                                    </div>
+                                    <p>Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to sign in.</p>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'users:two_factor_setup' %}" class="btn btn-success">
+                                            <i class="fas fa-lock me-2"></i> Enable Two-Factor Authentication
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h5>Login History</h5>
+                                <p>Recent login activity:</p>
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Date & Time</th>
+                                                <th>IP Address</th>
+                                                <th>Device</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{ user.last_login|date:"F d, Y H:i" }}</td>
+                                                <td>127.0.0.1</td>
+                                                <td>Current session</td>
+                                                <td><span class="badge bg-success">Success</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Appearance Settings -->
+                <div class="tab-pane fade" id="appearance">
+                    <div class="card shadow">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Appearance Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h5>Theme</h5>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                                    <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h5>Language</h5>
+                                <select class="form-select" id="languageSelect">
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" id="saveAppearanceBtn">
+                                    <i class="fas fa-save me-2"></i> Save Preferences
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notification Settings -->
+                <div class="tab-pane fade" id="notifications">
+                    <div class="card shadow">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Notification Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h5>Email Notifications</h5>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="emailChallenge" checked>
+                                    <label class="form-check-label" for="emailChallenge">
+                                        New challenge notifications
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="emailTeam" checked>
+                                    <label class="form-check-label" for="emailTeam">
+                                        Team-related notifications
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="emailAnnouncements" checked>
+                                    <label class="form-check-label" for="emailAnnouncements">
+                                        CTF announcements
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="emailMarketing">
+                                    <label class="form-check-label" for="emailMarketing">
+                                        Marketing and promotional emails
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h5>In-App Notifications</h5>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="inappSolves" checked>
+                                    <label class="form-check-label" for="inappSolves">
+                                        Challenge solves by other teams
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="inappHints" checked>
+                                    <label class="form-check-label" for="inappHints">
+                                        New hint releases
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="inappAnnouncements" checked>
+                                    <label class="form-check-label" for="inappAnnouncements">
+                                        CTF announcements
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" id="saveNotificationsBtn">
+                                    <i class="fas fa-save me-2"></i> Save Notification Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle tab switching
+        const pillElements = document.querySelectorAll('[data-bs-toggle="pill"]');
+        pillElements.forEach(pill => {
+            pill.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Remove active class from all pills
+                pillElements.forEach(p => p.classList.remove('active'));
+                // Add active class to clicked pill
+                this.classList.add('active');
+                
+                // Hide all tab panes
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                tabPanes.forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                });
+                
+                // Show the selected tab pane
+                const targetId = this.getAttribute('href').substring(1);
+                const targetPane = document.getElementById(targetId);
+                targetPane.classList.add('show', 'active');
+            });
+        });
+        
+        // Dark mode toggle (demo only - doesn't actually change theme)
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', function() {
+                const message = this.checked ? 
+                    'Dark mode is not available with the current theme.' : 
+                    'Light mode is already enabled.';
+                alert(message);
+            });
+        }
+        
+        // Save appearance button (demo only)
+        const saveAppearanceBtn = document.getElementById('saveAppearanceBtn');
+        if (saveAppearanceBtn) {
+            saveAppearanceBtn.addEventListener('click', function() {
+                alert('Appearance preferences would be saved if implemented.');
+            });
+        }
+        
+        // Save notifications button (demo only)
+        const saveNotificationsBtn = document.getElementById('saveNotificationsBtn');
+        if (saveNotificationsBtn) {
+            saveNotificationsBtn.addEventListener('click', function() {
+                alert('Notification preferences would be saved if implemented.');
+            });
+        }
+    });
+</script>
+{% endblock %}

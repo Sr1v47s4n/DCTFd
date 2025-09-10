@@ -1,0 +1,271 @@
+/* Organizer Theme - Styles specific to organizer interface */
+
+:root {
+  /* Organizer-specific color palette */
+  --organizer-primary: #3949ab;
+  --organizer-secondary: #00acc1;
+  --organizer-accent: #ffab00;
+  --organizer-background: #f5f7fa;
+  --organizer-card: #ffffff;
+  --organizer-border: #e0e6ed;
+  --organizer-text: #37474f;
+  --organizer-text-light: #78909c;
+  --organizer-danger: #f44336;
+  --organizer-warning: #ff9800;
+  --organizer-success: #4caf50;
+  --organizer-info: #2196f3;
+}
+
+/* Base styling for organizer interface */
+.organizer-container {
+  background-color: var(--organizer-background);
+  min-height: 100vh;
+}
+
+.organizer-card {
+  background-color: var(--organizer-card);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--organizer-border);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.organizer-card-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--organizer-border);
+  background-color: rgba(57, 73, 171, 0.05);
+}
+
+.organizer-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--organizer-primary);
+  margin: 0;
+}
+
+.organizer-card-body {
+  padding: 20px;
+}
+
+/* Action buttons */
+.organizer-btn-primary {
+  background-color: var(--organizer-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.organizer-btn-primary:hover {
+  background-color: #303f9f;
+  box-shadow: 0 4px 8px rgba(57, 73, 171, 0.2);
+}
+
+.organizer-btn-secondary {
+  background-color: var(--organizer-secondary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.organizer-btn-secondary:hover {
+  background-color: #0097a7;
+  box-shadow: 0 4px 8px rgba(0, 172, 193, 0.2);
+}
+
+.organizer-btn-danger {
+  background-color: var(--organizer-danger);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.organizer-btn-danger:hover {
+  background-color: #d32f2f;
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.2);
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge-active {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #2e7d32;
+}
+
+.status-badge-inactive {
+  background-color: rgba(158, 158, 158, 0.15);
+  color: #616161;
+}
+
+.status-badge-pending {
+  background-color: rgba(255, 152, 0, 0.15);
+  color: #ef6c00;
+}
+
+/* Statistics cards */
+.stat-card {
+  background: linear-gradient(135deg, #3949ab, #5c6bc0);
+  color: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(57, 73, 171, 0.2);
+}
+
+.stat-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+
+.stat-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.stat-card-change {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.stat-card-change.positive {
+  color: #a5d6a7;
+}
+
+.stat-card-change.negative {
+  color: #ef9a9a;
+}
+
+/* Tables */
+.organizer-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.organizer-table th {
+  background-color: rgba(57, 73, 171, 0.05);
+  color: var(--organizer-primary);
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 15px;
+  border-bottom: 2px solid var(--organizer-border);
+}
+
+.organizer-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--organizer-border);
+  color: var(--organizer-text);
+}
+
+.organizer-table tr:hover {
+  background-color: rgba(57, 73, 171, 0.02);
+}
+
+/* Event management */
+.event-card {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid var(--organizer-border);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: all 0.2s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border-color: var(--organizer-primary);
+}
+
+.event-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  margin-right: 15px;
+  object-fit: cover;
+}
+
+.event-details {
+  flex: 1;
+}
+
+.event-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--organizer-text);
+  margin: 0 0 5px;
+}
+
+.event-dates {
+  color: var(--organizer-text-light);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.event-dates i {
+  margin-right: 5px;
+}
+
+.event-teams {
+  color: var(--organizer-text-light);
+  font-size: 14px;
+}
+
+.event-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .stat-card {
+    margin-bottom: 15px;
+  }
+  
+  .organizer-card-header {
+    padding: 12px 15px;
+  }
+  
+  .organizer-card-body {
+    padding: 15px;
+  }
+  
+  .event-actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .event-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .event-logo {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+}

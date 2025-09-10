@@ -1,0 +1,551 @@
+{% extends 'users/base.html' %}
+{% load static %}
+{% load avatar_tags %}
+
+{% block title %}Edit Profile | DCTFd{% endblock %}
+
+{% block extra_head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/components/avatar-selector.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/avatar-upload.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0">Edit Profile</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5>Basic Information</h5>
+                                <hr>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                                    {{ form.username }}
+                                    <small class="text-muted">Username cannot be changed</small>
+                                    {% if form.username.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.username.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                                    {{ form.email }}
+                                    <small class="text-muted">Email address cannot be changed</small>
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.email.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.first_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.last_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.phone.id_for_label }}" class="form-label">{{ form.phone.label }}</label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.phone.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.country.id_for_label }}" class="form-label">{{ form.country.label }}</label>
+                                    {{ form.country }}
+                                    {% if form.country.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.country.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.gender.id_for_label }}" class="form-label">{{ form.gender.label }}</label>
+                                    {{ form.gender }}
+                                    {% if form.gender.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.gender.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5>Avatar Selection</h5>
+                                <hr>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.avatar.label }}</label>
+                                    <div class="mb-3">
+                                        {% if user.avatar or user.custom_avatar %}
+                                        <div class="current-avatar mb-3">
+                                            <img src="{{ user.get_avatar_url }}" alt="Current avatar">
+                                            <div class="current-avatar-text">
+                                                <p>Your current avatar</p>
+                                                <small>Select a new avatar from the options below</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <div id="avatar-selection-container">
+                                            {% render_avatar_selection form.avatar %}
+                                        </div>
+                                    </div>
+                                    {% if form.avatar.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.avatar.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="custom-avatar-section">
+                                    <h6>Upload Custom Avatar</h6>
+                                    <small class="text-muted mb-3 d-block">If you prefer to use your own image, you can upload it here.</small>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.custom_avatar.id_for_label }}" class="form-label">{{ form.custom_avatar.label }}</label>
+                                        <div class="custom-file-upload">
+                                            {{ form.custom_avatar }}
+                                            <small class="text-muted d-block mt-1">{{ form.custom_avatar.help_text }}</small>
+                                            <small class="text-muted d-block mt-1">Supported formats: JPG, PNG, SVG. Max size: 2MB</small>
+                                        </div>
+                                        {% if form.custom_avatar.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.custom_avatar.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if user.custom_avatar %}
+                                        <div class="custom-avatar-preview">
+                                            <img src="{{ user.custom_avatar.url }}?_t={{ user.last_login|date:'U' }}" alt="Current custom avatar">
+                                            <div>
+                                                <p class="mb-0">Current custom avatar</p>
+                                                <small class="text-muted">Upload a new image to replace</small>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5>Profile Information</h5>
+                                <hr>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.bio.id_for_label }}" class="form-label">{{ form.bio.label }}</label>
+                                    {{ form.bio }}
+                                    {% if form.bio.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.bio.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.affiliation.id_for_label }}" class="form-label">{{ form.affiliation.label }}</label>
+                                    {{ form.affiliation }}
+                                    {% if form.affiliation.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.affiliation.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.website.id_for_label }}" class="form-label">{{ form.website.label }}</label>
+                                    {{ form.website }}
+                                    {% if form.website.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.website.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5>Social Media</h5>
+                                <hr>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.discord_id.id_for_label }}" class="form-label">{{ form.discord_id.label }}</label>
+                                    {{ form.discord_id }}
+                                    {% if form.discord_id.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.discord_id.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.github_username.id_for_label }}" class="form-label">{{ form.github_username.label }}</label>
+                                    {{ form.github_username }}
+                                    {% if form.github_username.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.github_username.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.linkedin_profile.id_for_label }}" class="form-label">{{ form.linkedin_profile.label }}</label>
+                                    {{ form.linkedin_profile }}
+                                    {% if form.linkedin_profile.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.linkedin_profile.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.twitter_username.id_for_label }}" class="form-label">{{ form.twitter_username.label }}</label>
+                                    {{ form.twitter_username }}
+                                    {% if form.twitter_username.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.twitter_username.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5>Privacy Settings</h5>
+                                <hr>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="mb-3 form-check">
+                                    {{ form.hidden }}
+                                    <label class="form-check-label" for="{{ form.hidden.id_for_label }}">{{ form.hidden.label }}</label>
+                                    {% if form.hidden.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.hidden.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'users:profile' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/avatar-selection.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug script for profile edit page
+    console.log('Debug script loaded for profile edit page');
+    
+    // Get the current avatar element
+    const currentAvatarImg = document.querySelector('.current-avatar img');
+    
+    // Custom file upload handling
+    const fileInput = document.querySelector('input[name="custom_avatar"]');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            // Check if a file was selected
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+                
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/svg+xml'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please select a valid image file (JPG, PNG, SVG)');
+                    this.value = ''; // Clear the input
+                    return;
+                }
+                
+                // Validate file size (max 2MB)
+                const maxSize = 2 * 1024 * 1024; // 2MB in bytes
+                if (file.size > maxSize) {
+                    alert('File size exceeds 2MB limit. Please select a smaller file.');
+                    this.value = ''; // Clear the input
+                    return;
+                }
+                
+                // Show preview of selected file
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Update the current avatar with the selected image
+                    if (currentAvatarImg) {
+                        currentAvatarImg.src = e.target.result;
+                        
+                        // Update the avatar description
+                        const avatarText = currentAvatarImg.nextElementSibling;
+                        if (avatarText) {
+                            const p = avatarText.querySelector('p') || document.createElement('p');
+                            const small = avatarText.querySelector('small') || document.createElement('small');
+                            
+                            p.textContent = 'Custom avatar selected';
+                            small.textContent = 'Will be set as your profile picture when saved';
+                            
+                            if (!avatarText.contains(p)) avatarText.appendChild(p);
+                            if (!avatarText.contains(small)) avatarText.appendChild(small);
+                        }
+                    }
+                    
+                    // If there's an existing preview, update it
+                    let preview = document.querySelector('.custom-avatar-preview');
+                    
+                    // If no preview exists, create one
+                    if (!preview) {
+                        preview = document.createElement('div');
+                        preview.className = 'custom-avatar-preview';
+                        
+                        const img = document.createElement('img');
+                        const infoDiv = document.createElement('div');
+                        const p = document.createElement('p');
+                        const small = document.createElement('small');
+                        
+                        p.className = 'mb-0';
+                        p.textContent = 'Selected custom avatar';
+                        
+                        small.className = 'text-muted';
+                        small.textContent = 'Will be uploaded when you save changes';
+                        
+                        infoDiv.appendChild(p);
+                        infoDiv.appendChild(small);
+                        
+                        preview.appendChild(img);
+                        preview.appendChild(infoDiv);
+                        
+                        // Add the preview after the file input
+                        fileInput.parentNode.after(preview);
+                    }
+                    
+                    // Update the image in the preview
+                    const img = preview.querySelector('img');
+                    img.src = e.target.result;
+                    img.alt = 'Selected custom avatar';
+                    
+                    // Unselect any predefined avatars since we're using a custom one
+                    const avatarRadios = document.querySelectorAll('input[name="avatar"]');
+                    avatarRadios.forEach(radio => {
+                        radio.checked = false;
+                        const option = radio.closest('.avatar-option');
+                        if (option) {
+                            option.classList.remove('selected');
+                        }
+                    });
+                    
+                    // Create a note explaining that custom avatar takes precedence
+                    let note = document.querySelector('.custom-avatar-note');
+                    if (!note) {
+                        note = document.createElement('div');
+                        note.className = 'custom-avatar-note alert alert-info mt-3';
+                        note.innerHTML = '<strong>Note:</strong> Your custom uploaded avatar will be used instead of any selected predefined avatar.';
+                        document.querySelector('.avatar-selection-wrapper').after(note);
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Avatar selection handling
+    const avatarRadios = document.querySelectorAll('input[name="avatar"]');
+    
+    avatarRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            console.log('Avatar selection changed to ID:', this.value);
+            
+            // If a predefined avatar is selected, clear any custom avatar selection
+            if (fileInput) {
+                fileInput.value = '';
+                
+                // Remove any custom avatar preview
+                const preview = document.querySelector('.custom-avatar-preview');
+                if (preview) {
+                    preview.remove();
+                }
+                
+                // Remove any custom avatar note
+                const note = document.querySelector('.custom-avatar-note');
+                if (note) {
+                    note.remove();
+                }
+            }
+            
+            // Update the current avatar preview with the selected predefined avatar
+            if (currentAvatarImg) {
+                const selectedAvatarImg = this.closest('.avatar-option').querySelector('img');
+                if (selectedAvatarImg) {
+                    // Add timestamp to force refresh
+                    const timestamp = new Date().getTime();
+                    currentAvatarImg.src = selectedAvatarImg.src + '?_t=' + timestamp;
+                    
+                    // Update the avatar description
+                    const avatarText = currentAvatarImg.nextElementSibling;
+                    if (avatarText) {
+                        const p = avatarText.querySelector('p') || document.createElement('p');
+                        const small = avatarText.querySelector('small') || document.createElement('small');
+                        
+                        p.textContent = 'Selected avatar';
+                        small.textContent = 'Will be set as your profile picture when saved';
+                        
+                        if (!avatarText.contains(p)) avatarText.appendChild(p);
+                        if (!avatarText.contains(small)) avatarText.appendChild(small);
+                    }
+                }
+            }
+        });
+    });
+    
+    // Debug form submission
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        console.log('Form submission triggered');
+        
+        // Find which avatar is selected
+        const avatarRadios = document.querySelectorAll('input[name="avatar"]');
+        let selectedAvatar = null;
+        
+        avatarRadios.forEach(radio => {
+            if (radio.checked) {
+                selectedAvatar = radio.value;
+            }
+        });
+        
+        console.log('Selected avatar at submission:', selectedAvatar);
+        console.log('Custom file upload:', fileInput ? (fileInput.files[0] ? fileInput.files[0].name : 'No file selected') : 'No file input found');
+        
+        // Add a hidden debug field to verify form data is correctly sent
+        const debugField = document.createElement('input');
+        debugField.type = 'hidden';
+        debugField.name = 'debug_timestamp';
+        debugField.value = new Date().getTime();
+        form.appendChild(debugField);
+    });
+});
+</script>
+{% endblock %}

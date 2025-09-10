@@ -1,0 +1,256 @@
+{% extends "organizer/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .validation-errors {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  
+  .validation-error {
+    border-left: 3px solid #dc3545;
+    padding-left: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .field-error {
+    padding-left: 15px;
+    font-size: 0.9em;
+  }
+  
+  .challenge-card {
+    border-left: 3px solid #28a745;
+    margin-bottom: 8px;
+  }
+  
+  .challenges-list {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  .success-icon {
+    color: #28a745;
+  }
+  
+  .error-icon {
+    color: #dc3545;
+  }
+  
+  .warning-icon {
+    color: #ffc107;
+  }
+  
+  .badge-difficulty {
+    min-width: 24px;
+  }
+  
+  .difficulty-1 { background-color: #28a745; }
+  .difficulty-2 { background-color: #20c997; }
+  .difficulty-3 { background-color: #ffc107; }
+  .difficulty-4 { background-color: #fd7e14; }
+  .difficulty-5 { background-color: #dc3545; }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0">{% trans "Challenge Import Results" %}</h2>
+        <a href="{% url 'organizer:challenges' %}" class="btn btn-outline-secondary">
+          <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Challenges" %}
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Import Summary Card -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        {% if import_results.success %}
+          <i class="fas fa-check-circle success-icon me-2"></i>
+        {% else %}
+          <i class="fas fa-times-circle error-icon me-2"></i>
+        {% endif %}
+        {% trans "Import Summary" %}
+      </h5>
+      <span class="badge bg-secondary">{{ import_results.filename }}</span>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>{% trans "File Name" %}</th>
+                <td>{{ import_results.filename }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "File Size" %}</th>
+                <td>{{ import_results.filesize|filesizeformat }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "Status" %}</th>
+                <td>
+                  {% if import_results.success %}
+                    <span class="badge bg-success">{% trans "Success" %}</span>
+                  {% else %}
+                    <span class="badge bg-danger">{% trans "Failed" %}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-6">
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>{% trans "Total Challenges" %}</th>
+                <td>{{ import_results.challenges_total }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "Valid Challenges" %}</th>
+                <td>{{ import_results.challenges_valid }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "Imported Challenges" %}</th>
+                <td>{{ import_results.challenges_imported }}</td>
+              </tr>
+              <tr>
+                <th>{% trans "Categories Created" %}</th>
+                <td>{{ import_results.categories_created|length }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Categories Created -->
+  {% if import_results.categories_created %}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="fas fa-tags me-2"></i>
+        {% trans "Categories Created" %}
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        {% for category in import_results.categories_created %}
+        <div class="col-md-3 mb-2">
+          <div class="badge bg-primary p-2">{{ category }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  
+  <!-- Validation Errors -->
+  {% if import_results.errors %}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-danger text-white">
+      <h5 class="mb-0">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {% trans "Validation Errors" %}
+      </h5>
+    </div>
+    <div class="card-body validation-errors">
+      {% for error in import_results.errors %}
+        {% if error.type %}
+          <!-- General format errors -->
+          <div class="validation-error">
+            <p><strong>{{ error.message }}</strong></p>
+          </div>
+        {% else %}
+          <!-- Challenge-specific errors -->
+          <div class="validation-error">
+            <h6>{% trans "Challenge" %}: {{ error.challenge }}</h6>
+            <div class="field-errors">
+              {% for field_error in error.errors %}
+                <div class="field-error">
+                  <strong>{{ field_error.field }}</strong>: {{ field_error.message }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  
+  <!-- Imported Challenges -->
+  {% if import_results.imported_challenges %}
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-success text-white">
+      <h5 class="mb-0">
+        <i class="fas fa-flag-checkered me-2"></i>
+        {% trans "Imported Challenges" %} ({{ import_results.imported_challenges|length }})
+      </h5>
+    </div>
+    <div class="card-body challenges-list">
+      <div class="row">
+        {% for challenge in import_results.imported_challenges %}
+        <div class="col-md-6 mb-3">
+          <div class="card challenge-card">
+            <div class="card-body py-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">
+                  <a href="{% url 'organizer:challenge_detail' challenge.id %}">{{ challenge.name }}</a>
+                </h6>
+                <div>
+                  <span class="badge bg-secondary me-1">{{ challenge.category }}</span>
+                  <span class="badge badge-difficulty difficulty-{{ challenge.difficulty }}">{{ challenge.difficulty }}</span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between small text-muted">
+                <div>
+                  <i class="fas fa-flag me-1"></i> {{ challenge.flags_count }} {% trans "flags" %}
+                  {% if challenge.hints_count > 0 %}
+                  <span class="ms-2"><i class="fas fa-lightbulb me-1"></i> {{ challenge.hints_count }} {% trans "hints" %}</span>
+                  {% endif %}
+                </div>
+                <div>
+                  <i class="fas fa-star me-1"></i> {{ challenge.value }} {% trans "points" %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  
+  <!-- Action Buttons -->
+  <div class="row">
+    <div class="col-12 d-flex justify-content-between">
+      <a href="{% url 'organizer:challenges' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Challenges" %}
+      </a>
+      
+      {% if import_results.success %}
+      <a href="{% url 'organizer:challenges' %}" class="btn btn-primary">
+        <i class="fas fa-check me-2"></i>{% trans "Continue" %}
+      </a>
+      {% else %}
+      <a href="{% url 'organizer:challenges_import' %}" class="btn btn-primary">
+        <i class="fas fa-redo me-2"></i>{% trans "Try Again" %}
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock dashboard_content %}

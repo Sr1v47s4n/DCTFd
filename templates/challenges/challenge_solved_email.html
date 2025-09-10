@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Challenge Solved</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        .success-banner {
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .challenge-info {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Challenge Solved!</h2>
+        </div>
+        
+        <p>Congratulations {{ user.first_name }}!</p>
+        
+        <div class="success-banner">
+            <h3>🎉 You've successfully solved a challenge! 🎉</h3>
+        </div>
+        
+        <div class="challenge-info">
+            <h3>{{ challenge.name }}</h3>
+            <p><strong>Category:</strong> {{ challenge.category }}</p>
+            <p><strong>Difficulty:</strong> {{ challenge.get_difficulty_display }}</p>
+            <p><strong>Points:</strong> {{ challenge.points }}</p>
+            <p><strong>Event:</strong> {{ event.name }}</p>
+        </div>
+        
+        <p>Keep up the great work! Check out more challenges in this event.</p>
+        
+        <p style="text-align: center;">
+            <a href="{{ protocol }}://{{ domain }}{% url 'event:challenges' event.slug %}" class="button">View More Challenges</a>
+        </p>
+        
+        <p>Best regards,<br>The DCTFd Team</p>
+        
+        <div class="footer">
+            <p>&copy; {% now "Y" %} DCTFd. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

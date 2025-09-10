@@ -1,0 +1,34 @@
+{% extends 'organizer/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Reset CTF" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">{% trans "Reset CTF Event" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h4 class="alert-heading">{% trans "Warning!" %}</h4>
+                        <p>{% trans "Resetting the CTF will clear all submissions and team scores. This action cannot be undone." %}</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="confirmation" class="form-label">{% trans "Type 'RESET' to confirm" %}</label>
+                            <input type="text" class="form-control" id="confirmation" name="confirmation" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">{% trans "Reset CTF" %}</button>
+                        <a href="{% url 'organizer:settings' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

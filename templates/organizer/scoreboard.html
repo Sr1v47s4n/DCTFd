@@ -1,0 +1,374 @@
+{% extends "organizer/base.html" %}
+
+{% block dashboard_title %}Scoreboard{% endblock %}
+
+{% block dashboard_content %}
+<div class="scoreboard-header">
+  <div class="scoreboard-title">
+    <h2><i class="fas fa-trophy me-2"></i> CTF Scoreboard</h2>
+    <p>Real-time standings for all teams</p>
+  </div>
+  
+  <div class="scoreboard-controls">
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" id="autoRefresh" checked>
+      <label class="form-check-label" for="autoRefresh">Auto Refresh</label>
+    </div>
+    
+    {% if ctf.freeze_scoreboard %}
+      <div class="scoreboard-frozen">
+        <i class="fas fa-snowflake me-1"></i> Scoreboard Frozen
+      </div>
+    {% endif %}
+    
+    <button id="refreshScoreboard" class="btn btn-sm btn-primary">
+      <i class="fas fa-sync-alt me-1"></i> Refresh Now
+    </button>
+  </div>
+</div>
+
+{% if ctf.freeze_scoreboard %}
+  <div class="alert alert-info mb-4">
+    <i class="fas fa-info-circle me-2"></i> The scoreboard has been frozen. New solves will not be displayed until the freeze is lifted.
+    {% if ctf.freeze_time %}
+      Frozen at {{ ctf.freeze_time|date:"M d, Y - H:i" }}.
+    {% endif %}
+  </div>
+{% endif %}
+
+<div class="dashboard-card">
+  <div class="card-header">
+    <div class="team-count">
+      <i class="fas fa-users me-2"></i> {{ teams|length }} Teams
+    </div>
+    
+    <div class="scoreboard-filters">
+      <div class="dropdown">
+        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-download me-1"></i> Export
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+          <li><a class="dropdown-item" href="{% url 'organizer:export_scoreboard' format='csv' %}">CSV</a></li>
+          <li><a class="dropdown-item" href="{% url 'organizer:export_scoreboard' format='json' %}">JSON</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card-body">
+    {% if teams %}
+      <div class="table-responsive">
+        <table class="scoreboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Team</th>
+              <th>Score</th>
+              <th>Last Solve</th>
+              <th class="text-end">Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in teams %}
+              <tr class="{% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% endif %}">
+                <td class="team-rank">{{ forloop.counter }}</td>
+                <td>
+                  <div class="team-info">
+                    <span class="team-name">{{ team.name }}</span>
+                    {% if team.country_code %}
+                      <span class="team-country">
+                        <img src="{% static 'img/flags/'|add:team.country_code|add:'.svg' %}" alt="{{ team.country_code }}" class="country-flag">
+                      </span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="team-score">{{ team.score }}</td>
+                <td>
+                  {% if team.last_solve %}
+                    {{ team.last_solve|date:"M d, H:i" }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a href="{% url 'organizer:team_detail' team.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-chart-line me-1"></i> Details
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <i class="fas fa-trophy fa-4x mb-3"></i>
+        <h3>No Teams on the Scoreboard Yet</h3>
+        <p>Teams will appear here once they start solving challenges.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="dashboard-row mt-4">
+  <div class="dashboard-col">
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-flag me-2"></i> Challenge Solve Distribution</h3>
+      </div>
+      <div class="card-body">
+        {% if challenges %}
+          <div class="challenge-distribution">
+            {% for challenge in challenges %}
+              <div class="distribution-item">
+                <div class="distribution-label">
+                  <span class="challenge-name">{{ challenge.title }}</span>
+                  <span class="badge" style="background-color: {{ challenge.category.color }}">{{ challenge.category.name }}</span>
+                </div>
+                <div class="distribution-bar">
+                  <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ challenge.solve_percentage }}%;" 
+                         aria-valuenow="{{ challenge.solve_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <div class="distribution-stats">
+                    <span>{{ challenge.solve_count }} / {{ team_count }} teams</span>
+                    <span>{{ challenge.solve_percentage }}%</span>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-info">No challenges available yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-col">
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-bolt me-2"></i> Recent Solves</h3>
+      </div>
+      <div class="card-body">
+        {% if recent_solves %}
+          <div class="recent-solves">
+            {% for solve in recent_solves %}
+              <div class="solve-item">
+                <div class="solve-info">
+                  <div class="solve-team">{{ solve.team.name }}</div>
+                  <div class="solve-challenge">
+                    <span class="badge" style="background-color: {{ solve.challenge.category.color }}">{{ solve.challenge.category.name }}</span>
+                    {{ solve.challenge.title }}
+                  </div>
+                </div>
+                <div class="solve-time">
+                  <div class="time-value">{{ solve.solved_at|date:"H:i:s" }}</div>
+                  <div class="time-date">{{ solve.solved_at|date:"M d" }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="alert alert-info">No solves yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .scoreboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+  
+  .scoreboard-title h2 {
+    margin-bottom: 5px;
+    color: var(--primary-color);
+  }
+  
+  .scoreboard-title p {
+    color: var(--text-muted);
+    margin-bottom: 0;
+  }
+  
+  .scoreboard-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .scoreboard-frozen {
+    background-color: rgba(0, 176, 255, 0.1);
+    color: var(--info-color);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .team-count {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .team-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .team-name {
+    font-weight: 600;
+  }
+  
+  .country-flag {
+    width: 20px;
+    height: auto;
+    border-radius: 2px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 50px 0;
+    color: var(--text-muted);
+  }
+  
+  .empty-state i {
+    color: var(--dark-border);
+  }
+  
+  .challenge-distribution {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .distribution-item {
+    margin-bottom: 10px;
+  }
+  
+  .distribution-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  
+  .challenge-name {
+    font-weight: 600;
+  }
+  
+  .distribution-bar {
+    margin-top: 5px;
+  }
+  
+  .distribution-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+  
+  .recent-solves {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .solve-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid var(--success-color);
+  }
+  
+  .solve-team {
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  
+  .solve-challenge {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  
+  .solve-challenge .badge {
+    margin-right: 5px;
+  }
+  
+  .solve-time {
+    text-align: right;
+  }
+  
+  .time-value {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+  }
+  
+  .time-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  
+  /* Form Switch styling */
+  .form-switch .form-check-input {
+    background-color: var(--dark-border);
+    border-color: transparent;
+  }
+  
+  .form-switch .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const autoRefreshCheckbox = document.getElementById('autoRefresh');
+    const refreshButton = document.getElementById('refreshScoreboard');
+    let refreshInterval;
+    
+    // Function to refresh the scoreboard
+    function refreshScoreboard() {
+      fetch('{% url "organizer:scoreboard_data" %}')
+        .then(response => response.json())
+        .then(data => {
+          // Update the scoreboard with new data
+          console.log('Scoreboard refreshed:', data);
+          // Here you would update the DOM with the new data
+          // For simplicity, we're just reloading the page
+          location.reload();
+        })
+        .catch(error => {
+          console.error('Error refreshing scoreboard:', error);
+        });
+    }
+    
+    // Set up auto-refresh
+    function setupAutoRefresh() {
+      if (autoRefreshCheckbox.checked) {
+        refreshInterval = setInterval(refreshScoreboard, 30000); // Refresh every 30 seconds
+      } else {
+        clearInterval(refreshInterval);
+      }
+    }
+    
+    // Initialize auto-refresh
+    setupAutoRefresh();
+    
+    // Listen for changes to the auto-refresh checkbox
+    autoRefreshCheckbox.addEventListener('change', setupAutoRefresh);
+    
+    // Manual refresh button
+    refreshButton.addEventListener('click', function() {
+      refreshScoreboard();
+    });
+  });
+</script>
+{% endblock %}

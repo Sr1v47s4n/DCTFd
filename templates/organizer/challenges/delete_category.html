@@ -1,0 +1,70 @@
+{% extends "organizer/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Delete Category | Organizer Dashboard{% endblock %}
+
+{% block dashboard_title %}Delete Category{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+  <a href="{% url 'organizer:categories' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i> Back to Categories
+  </a>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="card dashboard-card">
+  <div class="card-header">
+    <h5 class="mb-0">Delete Category: {{ category.name }}</h5>
+  </div>
+  <div class="card-body">
+    {% if challenge_count > 0 %}
+      <div class="alert alert-warning">
+        <h5><i class="fas fa-exclamation-triangle me-2"></i> Warning</h5>
+        <p>This category contains <strong>{{ challenge_count }}</strong> challenges.</p>
+        <p>You cannot delete a category that has challenges associated with it.</p>
+      </div>
+      
+      <div class="mb-4">
+        <h6>Options:</h6>
+        <ol>
+          <li class="mb-2">Reassign the challenges to a different category before deleting this one.</li>
+          <li class="mb-2">Hide this category instead of deleting it.</li>
+        </ol>
+      </div>
+      
+      <form method="post" action="{% url 'organizer:delete_category' category.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="hide_instead" value="true">
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'organizer:categories' %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-warning">
+            <i class="fas fa-eye-slash me-1"></i> Hide Category
+          </button>
+        </div>
+      </form>
+    {% else %}
+      <p>Are you sure you want to delete the category "{{ category.name }}"?</p>
+      <p class="text-danger">This action cannot be undone.</p>
+      
+      <form method="post" action="{% url 'organizer:delete_category' category.id %}">
+        {% csrf_token %}
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'organizer:categories' %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash me-1"></i> Delete Category
+          </button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

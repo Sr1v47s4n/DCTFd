@@ -1,0 +1,509 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Notification Manager{% endblock %}
+
+{% block head %}
+<style>
+    .preview-area {
+        border: 1px dashed #ccc;
+        padding: 20px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        margin-top: 15px;
+    }
+    
+    .preview-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    
+    .preview-message {
+        margin-bottom: 15px;
+    }
+    
+    .preview-toast {
+        max-width: 350px;
+        border-radius: 5px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+    
+    .preview-toast .toast-header {
+        background-color: #f8f9fa;
+        color: #212529;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .preview-toast .toast-body {
+        padding: 12px;
+        background-color: #fff;
+    }
+    
+    .preview-alert {
+        border-radius: 5px;
+        padding: 12px 15px;
+        background-color: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-left: 4px solid #007bff;
+    }
+    
+    .preview-banner {
+        background-color: #343a40;
+        color: white;
+        padding: 12px;
+        border-radius: 5px;
+    }
+    
+    .sound-option {
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 5px;
+        transition: all 0.2s;
+    }
+    
+    .sound-option:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .sound-option.selected {
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+    }
+    
+    .sound-option i {
+        color: #007bff;
+        margin-right: 8px;
+    }
+    
+    .target-select {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .target-select .target-option {
+        flex: 1;
+        text-align: center;
+        padding: 15px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .target-select .target-option:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .target-select .target-option.selected {
+        background-color: #e9ecef;
+        border-color: #007bff;
+    }
+    
+    .target-select .target-option i {
+        font-size: 24px;
+        margin-bottom: 10px;
+        color: #6c757d;
+    }
+    
+    .target-select .target-option.selected i {
+        color: #007bff;
+    }
+    
+    .scheduled-options {
+        padding: 15px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        margin-top: 15px;
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0">Notification Manager</h1>
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">Send Notification</h5>
+                </div>
+                
+                <div class="card-body">
+                    <form method="post" action="{% url 'core:send_notification' %}" id="notificationForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="link" class="form-label">Link (Optional)</label>
+                            <input type="url" class="form-control" id="link" name="link" placeholder="https://example.com">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="notification_type" class="form-label">Notification Type</label>
+                                    <select class="form-select" id="notification_type" name="notification_type">
+                                        {% for value, label in notification_types.items %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="display_type" class="form-label">Display Type</label>
+                                    <select class="form-select" id="display_type" name="display_type">
+                                        {% for value, label in display_types.items %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="sound" class="form-label">Sound</label>
+                                    <select class="form-select" id="sound" name="sound">
+                                        {% for value, label in sound_options.items %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label d-block">Target</label>
+                            <div class="target-select">
+                                <div class="target-option selected" data-target="all">
+                                    <i class="fas fa-users"></i>
+                                    <div>All Users</div>
+                                </div>
+                                <div class="target-option" data-target="event">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <div>Event Participants</div>
+                                </div>
+                                <div class="target-option" data-target="user">
+                                    <i class="fas fa-user"></i>
+                                    <div>Specific User</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="target" id="target" value="all">
+                            
+                            <!-- Event selection (hidden by default) -->
+                            <div id="eventSelectContainer" class="mt-3" style="display: none;">
+                                <label for="event_id" class="form-label">Select Event</label>
+                                <select class="form-select" id="event_id" name="event_id">
+                                    <option value="">-- Select Event --</option>
+                                    {% for evt in active_events %}
+                                    <option value="{{ evt.id }}">{{ evt.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- User selection (hidden by default) -->
+                            <div id="userSelectContainer" class="mt-3" style="display: none;">
+                                <label for="user_id" class="form-label">User ID or Username</label>
+                                <input type="text" class="form-control" id="user_id" name="user_id" placeholder="Enter user ID or username">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="scheduledSwitch" name="scheduled" value="true">
+                                <label class="form-check-label" for="scheduledSwitch">Schedule for later</label>
+                            </div>
+                            
+                            <div id="scheduledOptions" class="scheduled-options" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="scheduled_date" class="form-label">Date</label>
+                                            <input type="date" class="form-control" id="scheduled_date" name="scheduled_date">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="scheduled_time" class="form-label">Time</label>
+                                            <input type="time" class="form-control" id="scheduled_time" name="scheduled_time">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-outline-secondary me-2" id="previewBtn">
+                                <i class="fas fa-eye me-1"></i> Preview
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-1"></i> Send Notification
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="sticky-top pt-4" style="top: 80px;">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="previewArea" class="preview-area">
+                            <div id="previewToast" class="preview-toast" style="display: none;">
+                                <div class="toast-header">
+                                    <strong class="me-auto" id="previewToastTitle">Notification Title</strong>
+                                    <small>just now</small>
+                                </div>
+                                <div class="toast-body" id="previewToastMessage">
+                                    Hello, this is a toast message!
+                                </div>
+                            </div>
+                            
+                            <div id="previewAlert" class="preview-alert" style="display: none;">
+                                <div class="preview-title" id="previewAlertTitle">Alert Title</div>
+                                <div class="preview-message" id="previewAlertMessage">
+                                    This is an important alert message.
+                                </div>
+                                <button class="btn btn-sm btn-primary">OK</button>
+                            </div>
+                            
+                            <div id="previewPush" class="preview-toast" style="display: none;">
+                                <div class="toast-header">
+                                    <strong class="me-auto">{{ event_name|default:"DCTFd" }}</strong>
+                                    <small>just now</small>
+                                </div>
+                                <div class="toast-body">
+                                    <div class="preview-title" id="previewPushTitle">Push Notification</div>
+                                    <div class="preview-message" id="previewPushMessage">
+                                        You have a new notification.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="previewBanner" class="preview-banner" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="preview-title" id="previewBannerTitle">Banner Title</div>
+                                        <div class="preview-message" id="previewBannerMessage">
+                                            This is a banner notification.
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-light">Dismiss</button>
+                                </div>
+                            </div>
+                            
+                            <div id="noPreview" class="text-center py-4">
+                                <i class="fas fa-bell fa-2x text-muted mb-3"></i>
+                                <p class="text-muted">Click preview to see how your notification will appear.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6>Sound Preview</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for value, label in sound_options.items %}
+                                {% if value != 'none' %}
+                                <div class="sound-option" data-sound="{{ value }}">
+                                    <i class="fas fa-play-circle"></i> {{ label }}
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card shadow mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Help</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Display Types</h6>
+                        <ul class="small">
+                            <li><strong>Toast</strong> - Small notification that appears briefly</li>
+                            <li><strong>Push</strong> - Browser push notification</li>
+                            <li><strong>Alert</strong> - Modal dialog that requires user action</li>
+                            <li><strong>Banner</strong> - Full-width banner at the top of the page</li>
+                        </ul>
+                        
+                        <h6>Notification Types</h6>
+                        <ul class="small">
+                            <li><strong>System</strong> - System updates and maintenance</li>
+                            <li><strong>Event</strong> - Event-related information</li>
+                            <li><strong>Team</strong> - Team updates and information</li>
+                            <li><strong>Challenge</strong> - Challenge-related updates</li>
+                            <li><strong>Achievement</strong> - Awards and achievements</li>
+                            <li><strong>Message</strong> - Personal messages</li>
+                            <li><strong>Announcement</strong> - Important announcements</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audio elements for notification sounds -->
+<audio id="sound-notification" src="https://assets.mixkit.co/sfx/preview/mixkit-notification-alert-951.mp3" preload="auto"></audio>
+<audio id="sound-success" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" preload="auto"></audio>
+<audio id="sound-error" src="https://assets.mixkit.co/sfx/preview/mixkit-alert-quick-chime-766.mp3" preload="auto"></audio>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form elements
+        const titleInput = document.getElementById('title');
+        const messageInput = document.getElementById('message');
+        const displayTypeSelect = document.getElementById('display_type');
+        const soundSelect = document.getElementById('sound');
+        const targetInput = document.getElementById('target');
+        const eventSelectContainer = document.getElementById('eventSelectContainer');
+        const userSelectContainer = document.getElementById('userSelectContainer');
+        const scheduledSwitch = document.getElementById('scheduledSwitch');
+        const scheduledOptions = document.getElementById('scheduledOptions');
+        
+        // Preview elements
+        const previewBtn = document.getElementById('previewBtn');
+        const previewArea = document.getElementById('previewArea');
+        const previewToast = document.getElementById('previewToast');
+        const previewAlert = document.getElementById('previewAlert');
+        const previewPush = document.getElementById('previewPush');
+        const previewBanner = document.getElementById('previewBanner');
+        const noPreview = document.getElementById('noPreview');
+        
+        // Preview text elements
+        const previewToastTitle = document.getElementById('previewToastTitle');
+        const previewToastMessage = document.getElementById('previewToastMessage');
+        const previewAlertTitle = document.getElementById('previewAlertTitle');
+        const previewAlertMessage = document.getElementById('previewAlertMessage');
+        const previewPushTitle = document.getElementById('previewPushTitle');
+        const previewPushMessage = document.getElementById('previewPushMessage');
+        const previewBannerTitle = document.getElementById('previewBannerTitle');
+        const previewBannerMessage = document.getElementById('previewBannerMessage');
+        
+        // Target options
+        const targetOptions = document.querySelectorAll('.target-option');
+        
+        // Sound options
+        const soundOptions = document.querySelectorAll('.sound-option');
+        
+        // Preview button click handler
+        previewBtn.addEventListener('click', function() {
+            const title = titleInput.value || 'Notification Title';
+            const message = messageInput.value || 'This is a notification message.';
+            const displayType = displayTypeSelect.value;
+            const sound = soundSelect.value;
+            
+            // Hide all previews
+            previewToast.style.display = 'none';
+            previewAlert.style.display = 'none';
+            previewPush.style.display = 'none';
+            previewBanner.style.display = 'none';
+            noPreview.style.display = 'none';
+            
+            // Update preview text
+            previewToastTitle.textContent = title;
+            previewToastMessage.textContent = message;
+            previewAlertTitle.textContent = title;
+            previewAlertMessage.textContent = message;
+            previewPushTitle.textContent = title;
+            previewPushMessage.textContent = message;
+            previewBannerTitle.textContent = title;
+            previewBannerMessage.textContent = message;
+            
+            // Show the appropriate preview
+            switch (displayType) {
+                case 'toast':
+                    previewToast.style.display = 'block';
+                    break;
+                case 'alert':
+                    previewAlert.style.display = 'block';
+                    break;
+                case 'push':
+                    previewPush.style.display = 'block';
+                    break;
+                case 'banner':
+                    previewBanner.style.display = 'block';
+                    break;
+                default:
+                    noPreview.style.display = 'block';
+            }
+            
+            // Play sound if selected
+            if (sound !== 'none') {
+                playSound(sound);
+            }
+        });
+        
+        // Target option click handler
+        targetOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove selected class from all options
+                targetOptions.forEach(opt => opt.classList.remove('selected'));
+                
+                // Add selected class to clicked option
+                this.classList.add('selected');
+                
+                // Update hidden input
+                const target = this.dataset.target;
+                targetInput.value = target;
+                
+                // Show/hide appropriate containers
+                if (target === 'event') {
+                    eventSelectContainer.style.display = 'block';
+                    userSelectContainer.style.display = 'none';
+                } else if (target === 'user') {
+                    eventSelectContainer.style.display = 'none';
+                    userSelectContainer.style.display = 'block';
+                } else {
+                    eventSelectContainer.style.display = 'none';
+                    userSelectContainer.style.display = 'none';
+                }
+            });
+        });
+        
+        // Scheduled switch change handler
+        scheduledSwitch.addEventListener('change', function() {
+            scheduledOptions.style.display = this.checked ? 'block' : 'none';
+        });
+        
+        // Sound option click handler
+        soundOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const sound = this.dataset.sound;
+                playSound(sound);
+            });
+        });
+        
+        // Function to play sound
+        function playSound(sound) {
+            const audio = document.getElementById(`sound-${sound}`);
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.error('Error playing sound:', e));
+            }
+        }
+    });
+</script>
+{% endblock %}

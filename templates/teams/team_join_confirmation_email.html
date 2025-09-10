@@ -1,0 +1,26 @@
+{% extends "email/base_email.html" %}
+
+{% block email_title %}Team Membership Confirmation{% endblock %}
+
+{% block email_content %}
+<p>Hello {{ user.username }},</p>
+
+<p>You have successfully joined the team <strong>{{ team.name }}</strong> on DCTFd!</p>
+
+{% if is_captain %}
+<p>You are the team captain. As the captain, you can:</p>
+<ul>
+  <li>Invite new members to your team</li>
+  <li>Manage team members</li>
+  <li>Update team information</li>
+  <li>Remove members from the team</li>
+</ul>
+{% endif %}
+
+<p>You can view your team's page <a href="{{ protocol|default:'http' }}://{{ domain }}{% url 'teams:team_detail' team.id %}">here</a>.</p>
+
+<p>Good luck with your upcoming challenges!</p>
+
+<p>Thank you,<br>
+The DCTFd Team</p>
+{% endblock %}

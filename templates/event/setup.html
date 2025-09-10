@@ -1,0 +1,760 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Event Setup - DCTFd{% endblock %}
+
+{% block extra_css %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* Custom Select2 styles to match Bootstrap */
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1px solid #ced4da;
+    }
+    .select2-dropdown {
+        border: 1px solid #ced4da;
+    }
+    
+    /* Theme styles */
+    .theme-default {
+        --bg-color: #f8f9fa;
+        --text-color: #212529;
+        --card-bg: #ffffff;
+        --border-color: #dee2e6;
+    }
+    
+    .theme-dark {
+        --bg-color: #222;
+        --text-color: #f8f9fa;
+        --card-bg: #333;
+        --border-color: #444;
+    }
+    
+    .theme-light {
+        --bg-color: #ffffff;
+        --text-color: #333;
+        --card-bg: #f9f9f9;
+        --border-color: #eaeaea;
+    }
+    
+    /* Apply theme variables */
+    body.theme-dark {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+    
+    body.theme-dark .setup-section {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+    }
+    
+    body.theme-dark .form-control,
+    body.theme-dark .form-select {
+        background-color: #2d2d2d;
+        border-color: #444;
+        color: #f8f9fa;
+    }
+    
+    body.theme-light .setup-section {
+        background-color: var(--card-bg);
+        border: 1px solid var(--border-color);
+    }
+    
+    /* Enhanced setup sections */
+    .setup-container {
+        max-width: 850px;
+        margin: 0 auto;
+        padding-bottom: 50px;
+    }
+    
+    .setup-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 3rem 0 1.5rem;
+        position: relative;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .setup-header h1 {
+        color: var(--primary-color, #3498db);
+        margin-bottom: 1.2rem;
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+    
+    .setup-header p.lead {
+        font-size: 1.25rem;
+        color: #6c757d;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .setup-section {
+        margin-bottom: 2.5rem;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        background-color: #fff;
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border-left: 5px solid var(--primary-color, #3498db);
+    }
+    
+    .setup-section:hover {
+        box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.15);
+        transform: translateY(-3px);
+    }
+    
+    .setup-section h3 {
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+        color: var(--primary-color, #3498db);
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="setup-container">
+    <div class="setup-header">
+        <h1>Welcome to DCTFd</h1>
+        <p class="lead">Let's set up your first CTF event</p>
+    </div>
+    
+    <!-- Django Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" enctype="multipart/form-data" id="setupForm">
+        {% csrf_token %}
+        
+        <!-- Form Error Messages -->
+        {% if form.non_field_errors or settings_form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+            {% for error in settings_form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Event Details Section -->
+        <div class="setup-section">
+            <h3>Event Details</h3>
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" class="form-control {% if form.name.errors %}is-invalid{% endif %}" placeholder="My Awesome CTF" required>
+                {% if form.name.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-text">{{ form.name.help_text }}</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.short_description.id_for_label }}" class="form-label">{{ form.short_description.label }}</label>
+                <input type="text" name="{{ form.short_description.name }}" id="{{ form.short_description.id_for_label }}" class="form-control {% if form.short_description.errors %}is-invalid{% endif %}" placeholder="A brief description of your CTF event">
+                {% if form.short_description.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.short_description.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-text">{{ form.short_description.help_text }}</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" class="form-control {% if form.description.errors %}is-invalid{% endif %}" rows="5" placeholder="Detailed description of your CTF event"></textarea>
+                {% if form.description.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.description.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-text">{{ form.description.help_text }}</div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.access.id_for_label }}" class="form-label">{{ form.access.label }}</label>
+                        <select name="{{ form.access.name }}" id="{{ form.access.id_for_label }}" class="form-select {% if form.access.errors %}is-invalid{% endif %}">
+                            {% for value, label in form.access.field.choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.access.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.access.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.access.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.event_format.id_for_label }}" class="form-label">{{ form.event_format.label }}</label>
+                        <select name="{{ form.event_format.name }}" id="{{ form.event_format.id_for_label }}" class="form-select {% if form.event_format.errors %}is-invalid{% endif %}">
+                            {% for value, label in form.event_format.field.choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form.event_format.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.event_format.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">Choose how participants will compete</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row team-size-options">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.min_team_size.id_for_label }}" class="form-label">{{ form.min_team_size.label }}</label>
+                        <input type="number" name="{{ form.min_team_size.name }}" id="{{ form.min_team_size.id_for_label }}" class="form-control {% if form.min_team_size.errors %}is-invalid{% endif %}" value="1" min="1" max="20">
+                        {% if form.min_team_size.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.min_team_size.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.min_team_size.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.max_team_size.id_for_label }}" class="form-label">{{ form.max_team_size.label }}</label>
+                        <input type="number" name="{{ form.max_team_size.name }}" id="{{ form.max_team_size.id_for_label }}" class="form-control {% if form.max_team_size.errors %}is-invalid{% endif %}" value="4" min="1" max="20">
+                        {% if form.max_team_size.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.max_team_size.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.max_team_size.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group individual-option">
+                <div class="form-check">
+                    <input type="checkbox" name="{{ form.allow_individual_participants.name }}" id="{{ form.allow_individual_participants.id_for_label }}" class="form-check-input" {% if form.allow_individual_participants.value %}checked{% endif %}>
+                    <label for="{{ form.allow_individual_participants.id_for_label }}" class="form-check-label">{{ form.allow_individual_participants.label }}</label>
+                    <div class="form-text">{{ form.allow_individual_participants.help_text }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Time Settings Section -->
+        <div class="setup-section">
+            <h3>Time Settings</h3>
+            
+            <div class="form-group">
+                <label for="{{ form.timezone.id_for_label }}" class="form-label">{{ form.timezone.label }}</label>
+                <select name="{{ form.timezone.name }}" id="{{ form.timezone.id_for_label }}" class="form-select timezone-select {% if form.timezone.errors %}is-invalid{% endif %}">
+                    <option value="">Select Timezone</option>
+                    {% for tz in timezones %}
+                        <option value="{{ tz }}" {% if tz == 'UTC' %}selected{% endif %}>{{ tz }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.timezone.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.timezone.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-text">{{ form.timezone.help_text }}</div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.registration_start.id_for_label }}" class="form-label">{{ form.registration_start.label }}</label>
+                        <input type="datetime-local" name="{{ form.registration_start.name }}" id="{{ form.registration_start.id_for_label }}" class="form-control {% if form.registration_start.errors %}is-invalid{% endif %}" required>
+                        {% if form.registration_start.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.registration_start.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.registration_start.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.registration_end.id_for_label }}" class="form-label">{{ form.registration_end.label }}</label>
+                        <input type="datetime-local" name="{{ form.registration_end.name }}" id="{{ form.registration_end.id_for_label }}" class="form-control {% if form.registration_end.errors %}is-invalid{% endif %}" required>
+                        {% if form.registration_end.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.registration_end.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.registration_end.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.start_time.id_for_label }}" class="form-label">{{ form.start_time.label }}</label>
+                        <input type="datetime-local" name="{{ form.start_time.name }}" id="{{ form.start_time.id_for_label }}" class="form-control {% if form.start_time.errors %}is-invalid{% endif %}" required>
+                        {% if form.start_time.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.start_time.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.start_time.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.end_time.id_for_label }}" class="form-label">{{ form.end_time.label }}</label>
+                        <input type="datetime-local" name="{{ form.end_time.name }}" id="{{ form.end_time.id_for_label }}" class="form-control {% if form.end_time.errors %}is-invalid{% endif %}" required>
+                        {% if form.end_time.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.end_time.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.end_time.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Account Section -->
+        <div class="setup-section">
+            <h3>Admin Account</h3>
+            <p>Create the root administrator account for managing your CTF</p>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.admin_username.id_for_label }}" class="form-label">{{ form.admin_username.label }}</label>
+                        <input type="text" name="{{ form.admin_username.name }}" id="{{ form.admin_username.id_for_label }}" class="form-control {% if form.admin_username.errors %}is-invalid{% endif %}" placeholder="admin" required>
+                        {% if form.admin_username.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.admin_username.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.admin_username.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.admin_email.id_for_label }}" class="form-label">{{ form.admin_email.label }}</label>
+                        <input type="email" name="{{ form.admin_email.name }}" id="{{ form.admin_email.id_for_label }}" class="form-control {% if form.admin_email.errors %}is-invalid{% endif %}" placeholder="admin@example.com" required>
+                        {% if form.admin_email.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.admin_email.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.admin_email.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.admin_password.id_for_label }}" class="form-label">{{ form.admin_password.label }}</label>
+                        <input type="password" name="{{ form.admin_password.name }}" id="{{ form.admin_password.id_for_label }}" class="form-control {% if form.admin_password.errors %}is-invalid{% endif %}" required>
+                        {% if form.admin_password.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.admin_password.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.admin_password.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.admin_password_confirm.id_for_label }}" class="form-label">{{ form.admin_password_confirm.label }}</label>
+                        <input type="password" name="{{ form.admin_password_confirm.name }}" id="{{ form.admin_password_confirm.id_for_label }}" class="form-control {% if form.admin_password_confirm.errors %}is-invalid{% endif %}" required>
+                        {% if form.admin_password_confirm.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.admin_password_confirm.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.admin_password_confirm.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Appearance Section -->
+        <div class="setup-section">
+            <h3>Appearance</h3>
+            
+            <div class="form-group">
+                <label for="{{ form.theme.id_for_label }}" class="form-label">{{ form.theme.label }}</label>
+                <select name="{{ form.theme.name }}" id="{{ form.theme.id_for_label }}" class="form-select {% if form.theme.errors %}is-invalid{% endif %}">
+                    {% for value, label in form.theme.field.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.theme.errors %}
+                <div class="invalid-feedback">
+                    {% for error in form.theme.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+                <div class="form-text">{{ form.theme.help_text }}</div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="{{ form.primary_color.id_for_label }}" class="form-label">{{ form.primary_color.label }}</label>
+                        <div class="input-group">
+                            <input type="color" name="{{ form.primary_color.name }}" id="{{ form.primary_color.id_for_label }}" class="form-control form-control-color {% if form.primary_color.errors %}is-invalid{% endif %}" value="#3498db">
+                            <span class="input-group-text" id="primary-color-hex">#3498db</span>
+                        </div>
+                        {% if form.primary_color.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.primary_color.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.primary_color.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="{{ form.secondary_color.id_for_label }}" class="form-label">{{ form.secondary_color.label }}</label>
+                        <div class="input-group">
+                            <input type="color" name="{{ form.secondary_color.name }}" id="{{ form.secondary_color.id_for_label }}" class="form-control form-control-color {% if form.secondary_color.errors %}is-invalid{% endif %}" value="#2ecc71">
+                            <span class="input-group-text" id="secondary-color-hex">#2ecc71</span>
+                        </div>
+                        {% if form.secondary_color.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.secondary_color.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.secondary_color.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="{{ form.accent_color.id_for_label }}" class="form-label">{{ form.accent_color.label }}</label>
+                        <div class="input-group">
+                            <input type="color" name="{{ form.accent_color.name }}" id="{{ form.accent_color.id_for_label }}" class="form-control form-control-color {% if form.accent_color.errors %}is-invalid{% endif %}" value="#e74c3c">
+                            <span class="input-group-text" id="accent-color-hex">#e74c3c</span>
+                        </div>
+                        {% if form.accent_color.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.accent_color.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.accent_color.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="{{ form.logo.id_for_label }}" class="form-label">{{ form.logo.label }}</label>
+                        <input type="file" name="{{ form.logo.name }}" id="{{ form.logo.id_for_label }}" class="form-control {% if form.logo.errors %}is-invalid{% endif %}" accept="image/*">
+                        {% if form.logo.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.logo.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.logo.help_text }}</div>
+                        <div class="logo-preview-container mt-2"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="{{ form.banner.id_for_label }}" class="form-label">{{ form.banner.label }}</label>
+                        <input type="file" name="{{ form.banner.name }}" id="{{ form.banner.id_for_label }}" class="form-control {% if form.banner.errors %}is-invalid{% endif %}" accept="image/*">
+                        {% if form.banner.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.banner.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.banner.help_text }}</div>
+                        <div class="banner-preview-container mt-2"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="{{ form.favicon.id_for_label }}" class="form-label">{{ form.favicon.label }}</label>
+                        <input type="file" name="{{ form.favicon.name }}" id="{{ form.favicon.id_for_label }}" class="form-control {% if form.favicon.errors %}is-invalid{% endif %}" accept="image/*">
+                        {% if form.favicon.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.favicon.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ form.favicon.help_text }}</div>
+                        <div class="favicon-preview-container mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Advanced Settings Section -->
+        <div class="setup-section">
+            <h3>Advanced Settings</h3>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" name="{{ settings_form.require_email_verification.name }}" id="{{ settings_form.require_email_verification.id_for_label }}" class="form-check-input {% if settings_form.require_email_verification.errors %}is-invalid{% endif %}" {% if settings_form.require_email_verification.value %}checked{% endif %}>
+                            <label for="{{ settings_form.require_email_verification.id_for_label }}" class="form-check-label">{{ settings_form.require_email_verification.label }}</label>
+                            {% if settings_form.require_email_verification.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in settings_form.require_email_verification.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">{{ settings_form.require_email_verification.help_text }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" name="{{ settings_form.auto_approve_participants.name }}" id="{{ settings_form.auto_approve_participants.id_for_label }}" class="form-check-input {% if settings_form.auto_approve_participants.errors %}is-invalid{% endif %}" {% if settings_form.auto_approve_participants.value %}checked{% endif %}>
+                            <label for="{{ settings_form.auto_approve_participants.id_for_label }}" class="form-check-label">{{ settings_form.auto_approve_participants.label }}</label>
+                            {% if settings_form.auto_approve_participants.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in settings_form.auto_approve_participants.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">{{ settings_form.auto_approve_participants.help_text }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" name="{{ settings_form.show_challenges_before_start.name }}" id="{{ settings_form.show_challenges_before_start.id_for_label }}" class="form-check-input" {% if settings_form.show_challenges_before_start.value %}checked{% endif %}>
+                            <label for="{{ settings_form.show_challenges_before_start.id_for_label }}" class="form-check-label">{{ settings_form.show_challenges_before_start.label }}</label>
+                            <div class="form-text">{{ settings_form.show_challenges_before_start.help_text }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" name="{{ settings_form.use_dynamic_scoring.name }}" id="{{ settings_form.use_dynamic_scoring.id_for_label }}" class="form-check-input" {% if settings_form.use_dynamic_scoring.value %}checked{% endif %}>
+                            <label for="{{ settings_form.use_dynamic_scoring.id_for_label }}" class="form-check-label">{{ settings_form.use_dynamic_scoring.label }}</label>
+                            <div class="form-text">{{ settings_form.use_dynamic_scoring.help_text }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ settings_form.submission_cooldown.id_for_label }}" class="form-label">{{ settings_form.submission_cooldown.label }}</label>
+                        <input type="number" name="{{ settings_form.submission_cooldown.name }}" id="{{ settings_form.submission_cooldown.id_for_label }}" class="form-control {% if settings_form.submission_cooldown.errors %}is-invalid{% endif %}" value="5" min="0">
+                        {% if settings_form.submission_cooldown.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in settings_form.submission_cooldown.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ settings_form.submission_cooldown.help_text }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ settings_form.max_submissions_per_minute.id_for_label }}" class="form-label">{{ settings_form.max_submissions_per_minute.label }}</label>
+                        <input type="number" name="{{ settings_form.max_submissions_per_minute.name }}" id="{{ settings_form.max_submissions_per_minute.id_for_label }}" class="form-control {% if settings_form.max_submissions_per_minute.errors %}is-invalid{% endif %}" value="10" min="1">
+                        {% if settings_form.max_submissions_per_minute.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in settings_form.max_submissions_per_minute.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="form-text">{{ settings_form.max_submissions_per_minute.help_text }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 mb-5">
+            <button type="submit" class="btn btn-lg" style="background-color: var(--primary-color, #3498db); color: white; font-weight: 600; padding: 12px; border-radius: 8px; transition: all 0.3s ease;">
+                <i class="fas fa-arrow-right me-2"></i> Continue to Confirmation
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize color variables
+        initializeColorVariables();
+        
+        // Initialize Select2 for timezone dropdown
+        $('.timezone-select').select2({
+            placeholder: "Search and select timezone",
+            allowClear: true,
+            width: '100%'
+        });
+        
+        // Update color hex value displays and apply colors immediately
+        $('input[type="color"]').on('input', function() {
+            var hexValue = $(this).val();
+            var hexDisplay = $('#' + $(this).attr('id') + '-hex');
+            var colorId = $(this).attr('id');
+            
+            if (hexDisplay.length) {
+                hexDisplay.text(hexValue);
+            }
+            
+            // Apply colors immediately to see changes
+            if (colorId.includes('primary_color')) {
+                document.documentElement.style.setProperty('--primary-color', hexValue);
+            } else if (colorId.includes('secondary_color')) {
+                document.documentElement.style.setProperty('--secondary-color', hexValue);
+            } else if (colorId.includes('accent_color')) {
+                document.documentElement.style.setProperty('--accent-color', hexValue);
+            }
+        });
+        
+        // Initialize color variables from inputs on page load
+        function initializeColorVariables() {
+            document.documentElement.style.setProperty('--primary-color', $('#{{ form.primary_color.id_for_label }}').val());
+            document.documentElement.style.setProperty('--secondary-color', $('#{{ form.secondary_color.id_for_label }}').val());
+            document.documentElement.style.setProperty('--accent-color', $('#{{ form.accent_color.id_for_label }}').val());
+        }
+        
+        // Theme preview functionality
+        $('#{{ form.theme.id_for_label }}').change(function() {
+            var theme = $(this).val();
+            previewTheme(theme);
+        });
+        
+        function previewTheme(theme) {
+            // Remove any previous theme classes
+            $('body').removeClass('theme-default theme-dark theme-light theme-blue theme-green');
+            
+            // Add the selected theme class
+            $('body').addClass('theme-' + theme);
+            
+            // Set default colors based on theme
+            if (theme === 'default') {
+                $('#{{ form.primary_color.id_for_label }}').val('#3498db').trigger('input');
+                $('#{{ form.secondary_color.id_for_label }}').val('#2ecc71').trigger('input');
+                $('#{{ form.accent_color.id_for_label }}').val('#e74c3c').trigger('input');
+            } else if (theme === 'dark') {
+                $('#{{ form.primary_color.id_for_label }}').val('#375a7f').trigger('input');
+                $('#{{ form.secondary_color.id_for_label }}').val('#00bc8c').trigger('input');
+                $('#{{ form.accent_color.id_for_label }}').val('#e74c3c').trigger('input');
+            } else if (theme === 'light') {
+                $('#{{ form.primary_color.id_for_label }}').val('#4582ec').trigger('input');
+                $('#{{ form.secondary_color.id_for_label }}').val('#02b875').trigger('input');
+                $('#{{ form.accent_color.id_for_label }}').val('#f0ad4e').trigger('input');
+            }
+        }
+        
+        // File preview functionality
+        $('#{{ form.logo.id_for_label }}').change(function() {
+            previewImage(this, '.logo-preview-container', 'logo-preview');
+        });
+        
+        $('#{{ form.banner.id_for_label }}').change(function() {
+            previewImage(this, '.banner-preview-container', 'banner-preview');
+        });
+        
+        $('#{{ form.favicon.id_for_label }}').change(function() {
+            previewImage(this, '.favicon-preview-container', 'favicon-preview');
+        });
+        
+        function previewImage(input, containerSelector, previewClass) {
+            var container = $(containerSelector);
+            container.empty();
+            
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    var img = $('<img>').addClass('img-fluid ' + previewClass).attr('src', e.target.result);
+                    container.append(img);
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Handle event format changes
+        $('#{{ form.event_format.id_for_label }}').change(function() {
+            var format = $(this).val();
+            
+            if (format === 'individual') {
+                $('.team-size-options').hide();
+                $('.individual-option').hide();
+                
+                // Set min and max team size to 1
+                $('#{{ form.min_team_size.id_for_label }}').val(1);
+                $('#{{ form.max_team_size.id_for_label }}').val(1);
+                
+                // Check the allow individual participants checkbox
+                $('#{{ form.allow_individual_participants.id_for_label }}').prop('checked', true);
+            } 
+            else if (format === 'team') {
+                $('.team-size-options').show();
+                $('.individual-option').hide();
+                
+                // Reset min and max team size to defaults if they were 1
+                if ($('#{{ form.min_team_size.id_for_label }}').val() == 1 && 
+                    $('#{{ form.max_team_size.id_for_label }}').val() == 1) {
+                    $('#{{ form.min_team_size.id_for_label }}').val(1);
+                    $('#{{ form.max_team_size.id_for_label }}').val(4);
+                }
+                
+                // Uncheck the allow individual participants checkbox
+                $('#{{ form.allow_individual_participants.id_for_label }}').prop('checked', false);
+            }
+            else if (format === 'hybrid') {
+                $('.team-size-options').show();
+                $('.individual-option').show();
+                
+                // Reset min and max team size to defaults if they were 1
+                if ($('#{{ form.min_team_size.id_for_label }}').val() == 1 && 
+                    $('#{{ form.max_team_size.id_for_label }}').val() == 1) {
+                    $('#{{ form.min_team_size.id_for_label }}').val(1);
+                    $('#{{ form.max_team_size.id_for_label }}').val(4);
+                }
+                
+                // Check the allow individual participants checkbox
+                $('#{{ form.allow_individual_participants.id_for_label }}').prop('checked', true);
+            }
+        });
+        
+        // Set event format initially
+        $('#{{ form.event_format.id_for_label }}').trigger('change');
+    });
+</script>
+{% endblock %}

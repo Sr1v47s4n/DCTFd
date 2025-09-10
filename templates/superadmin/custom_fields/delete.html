@@ -1,0 +1,64 @@
+{% extends "superadmin/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block dashboard_title %}{% trans "Delete Custom Field" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">{% trans "Confirm Deletion" %}</h5>
+  </div>
+  <div class="card-body">
+    <div class="alert alert-warning">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {% blocktrans with label=field.label %}
+        Are you sure you want to delete the custom field "{{ label }}"? This action cannot be undone, and all data collected using this field will be permanently deleted.
+      {% endblocktrans %}
+    </div>
+    
+    <div class="card mb-4">
+      <div class="card-body">
+        <h6>{% trans "Field Details" %}</h6>
+        <dl class="row">
+          <dt class="col-sm-3">{% trans "Label" %}</dt>
+          <dd class="col-sm-9">{{ field.label }}</dd>
+          
+          <dt class="col-sm-3">{% trans "Type" %}</dt>
+          <dd class="col-sm-9">{{ field.get_field_type_display }}</dd>
+          
+          <dt class="col-sm-3">{% trans "Required" %}</dt>
+          <dd class="col-sm-9">
+            {% if field.required %}
+              <span class="badge bg-success">{% trans "Yes" %}</span>
+            {% else %}
+              <span class="badge bg-secondary">{% trans "No" %}</span>
+            {% endif %}
+          </dd>
+          
+          <dt class="col-sm-3">{% trans "For" %}</dt>
+          <dd class="col-sm-9">
+            {% if field.content_type.model == 'event' and field.field_for == 'user' %}
+              <span class="badge bg-primary">{% trans "User Registration" %}</span>
+            {% elif field.content_type.model == 'event' and field.field_for == 'team' %}
+              <span class="badge bg-info">{% trans "Team Creation" %}</span>
+            {% endif %}
+          </dd>
+        </dl>
+      </div>
+    </div>
+    
+    <form method="post">
+      {% csrf_token %}
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'superadmin:custom_fields' %}" class="btn btn-secondary">
+          <i class="fas fa-times me-1"></i> {% trans "Cancel" %}
+        </a>
+        <button type="submit" class="btn btn-danger">
+          <i class="fas fa-trash me-1"></i> {% trans "Delete Field" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

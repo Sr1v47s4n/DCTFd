@@ -1,0 +1,442 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block title %}Team Management - DCTFd{% endblock %}
+
+{% block extra_css %}
+<style>
+    .team-card {
+        transition: transform 0.2s ease;
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .team-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+    
+    .member-item {
+        transition: all 0.2s ease;
+    }
+    
+    .member-item:hover {
+        background-color: var(--bs-tertiary-bg);
+    }
+    
+    .invite-link {
+        background-color: var(--bs-tertiary-bg);
+        border-radius: 0.25rem;
+        padding: 0.5rem;
+        font-family: monospace;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .team-logo-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto 1rem auto;
+    }
+    
+    .team-settings-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+    
+    .team-settings-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Team Management</h1>
+        <a href="{% url 'teams:profile' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Team Profile
+        </a>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    {% if not team %}
+        <div class="card team-card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-users fa-4x mb-3 text-muted"></i>
+                <h3>You are not part of a team yet</h3>
+                <p class="mb-4">Join an existing team or create your own team to participate in CTF events.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'teams:create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i> Create a Team
+                    </a>
+                    <a href="{% url 'teams:join' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i> Join a Team
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <div class="card team-card sticky-lg-top" style="top: 1rem; z-index: 1;">
+                    <div class="card-header bg-light">
+                        <h4 class="card-title mb-0">{{ team.name }}</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if team.logo %}
+                            <img src="{{ team.logo.url }}" class="rounded-circle mb-3" width="150" height="150" alt="{{ team.name }}">
+                        {% else %}
+                            <div class="default-avatar mb-3">
+                                <i class="fas fa-users fa-7x text-muted"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-primary">{{ team.score }} points</span>
+                            <span class="badge bg-secondary">{{ team.members.count }} / {{ team.max_members }} members</span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            {% if is_captain %}
+                                <span class="badge bg-warning text-dark mb-2">You are the team captain</span>
+                            {% endif %}
+                            
+                            {% if event.status == 'registration' or event.status == 'planning' %}
+                                {% if is_captain %}
+                                    <button type="button" class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#disbandTeamModal">
+                                        <i class="fas fa-trash-alt me-2"></i> Disband Team
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-danger mb-2" data-bs-toggle="modal" data-bs-target="#leaveTeamModal">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Leave Team
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-8">
+                <div class="card team-card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Team Members</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6>Current Members ({{ team.members.count }} / {{ team.max_members }})</h6>
+                            {% if team.members.exists %}
+                                <ul class="list-group">
+                                    {% for member in team.members.all %}
+                                        <li class="list-group-item member-item d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                {% if member.avatar %}
+                                                    <img src="{{ member.avatar.url }}" class="rounded-circle me-2" width="40" height="40" alt="{{ member.username }}">
+                                                {% else %}
+                                                    <div class="bg-light rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                        <i class="fas fa-user text-secondary"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ member.username }}</strong>
+                                                    <div class="small text-muted">{{ member.email }}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                                {% if member.is_team_captain %}
+                                                    <span class="badge bg-warning text-dark">Captain</span>
+                                                {% else %}
+                                                    {% if is_captain %}
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                Actions
+                                                            </button>
+                                                            <ul class="dropdown-menu">
+                                                                <li>
+                                                                    <form action="{% url 'teams:promote_captain' %}" method="post" class="d-inline">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="user_id" value="{{ member.id }}">
+                                                                        <button type="submit" class="dropdown-item">Make Captain</button>
+                                                                    </form>
+                                                                </li>
+                                                                <li>
+                                                                    <form action="{% url 'teams:remove_member' %}" method="post" class="d-inline">
+                                                                        {% csrf_token %}
+                                                                        <input type="hidden" name="user_id" value="{{ member.id }}">
+                                                                        <button type="submit" class="dropdown-item text-danger">Remove from Team</button>
+                                                                    </form>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i> No members yet.
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if is_captain and team.members.count < team.max_members %}
+                            <div class="mb-4">
+                                <h6>Invite New Members</h6>
+                                <p class="text-muted">Share this link with people you want to invite to your team:</p>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control invite-link" id="invite-link" 
+                                           value="{{ invite_url }}" readonly>
+                                    <button class="btn btn-outline-primary" type="button" id="copy-invite-link">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h6>Pending Invitations</h6>
+                                {% if pending_invites %}
+                                    <ul class="list-group">
+                                        {% for invite in pending_invites %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>{{ invite.email }}</strong>
+                                                    <div class="small text-muted">Sent {{ invite.created_at|timesince }} ago</div>
+                                                </div>
+                                                
+                                                <form action="{% url 'teams:cancel_invite' %}" method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="invite_id" value="{{ invite.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-times me-1"></i> Cancel
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i> No pending invitations.
+                                    </div>
+                                {% endif %}
+                                
+                                <form action="{% url 'teams:send_invite' %}" method="post" class="mt-3">
+                                    {% csrf_token %}
+                                    <div class="input-group">
+                                        <input type="email" class="form-control" name="email" placeholder="Enter email address" required>
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="fas fa-paper-plane me-1"></i> Send Invite
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if is_captain %}
+                    <div class="card team-card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Team Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="{% url 'teams:update_settings' %}" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="team-settings-section">
+                                    <h6 class="mb-3">Basic Information</h6>
+                                    
+                                    <div class="mb-3">
+                                        <label for="team-name" class="form-label">Team Name</label>
+                                        <input type="text" class="form-control" id="team-name" name="name" value="{{ team.name }}" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="team-description" class="form-label">Team Description</label>
+                                        <textarea class="form-control" id="team-description" name="description" rows="3">{{ team.description }}</textarea>
+                                        <div class="form-text">Tell others about your team, skills, and interests.</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="team-settings-section">
+                                    <h6 class="mb-3">Team Logo</h6>
+                                    
+                                    <div class="text-center mb-3">
+                                        {% if team.logo %}
+                                            <img src="{{ team.logo.url }}" class="team-logo-preview" id="logo-preview" alt="Team Logo">
+                                        {% else %}
+                                            <img src="{% static 'img/default-team-logo.png' %}" class="team-logo-preview" id="logo-preview" alt="Default Logo">
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="team-logo" class="form-label">Upload New Logo</label>
+                                        <input class="form-control" type="file" id="team-logo" name="logo" accept="image/*">
+                                        <div class="form-text">Recommended size: 500x500 pixels. Max file size: 2MB.</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="team-settings-section">
+                                    <h6 class="mb-3">Team Details</h6>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="team-country" class="form-label">Country</label>
+                                            <select class="form-select" id="team-country" name="country">
+                                                <option value="">Select Country</option>
+                                                {% for code, name in countries %}
+                                                    <option value="{{ code }}" {% if team.country == code %}selected{% endif %}>{{ name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="team-affiliation" class="form-label">Affiliation</label>
+                                            <input type="text" class="form-control" id="team-affiliation" name="affiliation" value="{{ team.affiliation|default:'' }}">
+                                            <div class="form-text">School, company, or organization</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="team-website" class="form-label">Website</label>
+                                        <input type="url" class="form-control" id="team-website" name="website" value="{{ team.website|default:'' }}">
+                                    </div>
+                                </div>
+                                
+                                <div class="team-settings-section">
+                                    <h6 class="mb-3">Privacy Settings</h6>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="team-hidden" name="hidden" {% if team.hidden %}checked{% endif %}>
+                                        <label class="form-check-label" for="team-hidden">Hide team from public listings</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Modals -->
+        {% if is_captain %}
+            <div class="modal fade" id="disbandTeamModal" tabindex="-1" aria-labelledby="disbandTeamModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="disbandTeamModalLabel">Disband Team</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Warning:</strong> This action cannot be undone!
+                            </p>
+                            <p>Are you sure you want to disband your team? This will remove all members from the team and delete the team permanently.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{% url 'teams:disband' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Disband Team</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="modal fade" id="leaveTeamModal" tabindex="-1" aria-labelledby="leaveTeamModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="leaveTeamModalLabel">Leave Team</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to leave your team? You will lose access to all team submissions and progress.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{% url 'teams:leave' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Leave Team</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Logo preview
+    const logoInput = document.getElementById('team-logo');
+    const logoPreview = document.getElementById('logo-preview');
+    
+    if (logoInput && logoPreview) {
+        logoInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    logoPreview.src = e.target.result;
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+    
+    // Copy invite link
+    const copyButton = document.getElementById('copy-invite-link');
+    const inviteLink = document.getElementById('invite-link');
+    
+    if (copyButton && inviteLink) {
+        copyButton.addEventListener('click', function() {
+            inviteLink.select();
+            document.execCommand('copy');
+            
+            // Show feedback
+            const originalHTML = copyButton.innerHTML;
+            copyButton.innerHTML = '<i class="fas fa-check"></i>';
+            copyButton.classList.add('btn-success');
+            copyButton.classList.remove('btn-outline-primary');
+            
+            setTimeout(() => {
+                copyButton.innerHTML = originalHTML;
+                copyButton.classList.remove('btn-success');
+                copyButton.classList.add('btn-outline-primary');
+            }, 2000);
+        });
+    }
+});
+</script>
+{% endblock %}

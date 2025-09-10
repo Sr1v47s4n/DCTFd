@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block head %}
+<style>
+    .notification-list {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .notification-item {
+        border-left: 4px solid #ccc;
+        padding: 15px;
+        margin-bottom: 10px;
+        transition: all 0.2s ease;
+    }
+    
+    .notification-item:hover {
+        background-color: rgba(0,0,0,0.03);
+    }
+    
+    .notification-unread {
+        border-left-color: #007bff;
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    .notification-system { border-left-color: #6c757d; }
+    .notification-event { border-left-color: #28a745; }
+    .notification-team { border-left-color: #fd7e14; }
+    .notification-challenge { border-left-color: #dc3545; }
+    .notification-achievement { border-left-color: #ffc107; }
+    .notification-message { border-left-color: #17a2b8; }
+    .notification-announcement { border-left-color: #6f42c1; }
+    
+    .notification-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .notification-time {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .notification-controls {
+        font-size: 14px;
+    }
+    
+    .empty-notifications {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+    
+    .notification-badge {
+        border-radius: 3px;
+        padding: 2px 8px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .badge-system { background-color: #6c757d; color: white; }
+    .badge-event { background-color: #28a745; color: white; }
+    .badge-team { background-color: #fd7e14; color: white; }
+    .badge-challenge { background-color: #dc3545; color: white; }
+    .badge-achievement { background-color: #ffc107; color: black; }
+    .badge-message { background-color: #17a2b8; color: white; }
+    .badge-announcement { background-color: #6f42c1; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0">Notifications</h1>
+                
+                {% if unread_count > 0 %}
+                <form method="post" action="{% url 'core:notifications' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="mark_all" value="true">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-check-double me-1"></i> Mark all as read
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Notifications</h5>
+                    {% if unread_count > 0 %}
+                    <span class="badge bg-primary">{{ unread_count }} unread</span>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body p-0">
+                    {% if notifications %}
+                    <div class="notification-list">
+                        {% for notification in notifications %}
+                        <div class="notification-item {% if not notification.is_read %}notification-unread{% endif %} notification-{{ notification.type }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="notification-title">{{ notification.title }}</div>
+                                    <div class="mb-2">
+                                        <span class="notification-badge badge-{{ notification.type }}">{{ notification.get_type_display }}</span>
+                                        <span class="notification-time ms-2">{{ notification.created_at|date:"M d, Y H:i" }}</span>
+                                    </div>
+                                    <div class="notification-message">{{ notification.message }}</div>
+                                </div>
+                                
+                                <div class="notification-controls">
+                                    {% if not notification.is_read %}
+                                    <form method="post" action="{% url 'core:notifications' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    
+                                    {% if notification.link %}
+                                    <a href="{{ notification.link }}" class="btn btn-sm btn-outline-primary ms-1">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-notifications">
+                        <div class="mb-3">
+                            <i class="fas fa-bell-slash fa-3x text-muted"></i>
+                        </div>
+                        <h5>No Notifications</h5>
+                        <p class="text-muted">You don't have any notifications yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

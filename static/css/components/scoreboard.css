@@ -1,0 +1,163 @@
+/* Scoreboard Component Styles */
+
+/* Scoreboard card styling */
+.scoreboard-entry {
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.current-entry {
+    background-color: var(--bs-primary-bg-subtle) !important;
+    font-weight: bold;
+}
+
+.scoreboard-badge {
+    min-width: 2.5rem;
+    display: inline-block;
+    text-align: center;
+}
+
+.score-change {
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+}
+
+.score-increase {
+    color: var(--bs-success);
+}
+
+.score-graph-container {
+    height: 400px;
+    margin-bottom: 2rem;
+}
+
+.medal-1 { color: gold; }
+.medal-2 { color: silver; }
+.medal-3 { color: #cd7f32; } /* bronze */
+
+/* Scoreboard filter controls */
+.scoreboard-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.scoreboard-filters {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+/* Scoreboard table styling */
+.scoreboard-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.scoreboard-table th {
+    background-color: var(--bs-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.025em;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--bs-border-color);
+}
+
+.scoreboard-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.scoreboard-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Animation delay for scoreboard entries */
+.scoreboard-entry:nth-child(1) { animation-delay: 0.05s; }
+.scoreboard-entry:nth-child(2) { animation-delay: 0.1s; }
+.scoreboard-entry:nth-child(3) { animation-delay: 0.15s; }
+.scoreboard-entry:nth-child(4) { animation-delay: 0.2s; }
+.scoreboard-entry:nth-child(5) { animation-delay: 0.25s; }
+.scoreboard-entry:nth-child(6) { animation-delay: 0.3s; }
+.scoreboard-entry:nth-child(7) { animation-delay: 0.35s; }
+.scoreboard-entry:nth-child(8) { animation-delay: 0.4s; }
+.scoreboard-entry:nth-child(9) { animation-delay: 0.45s; }
+.scoreboard-entry:nth-child(10) { animation-delay: 0.5s; }
+
+/* Graph tooltip customization */
+.graph-tooltip {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Scoreboard stat cards */
+.scoreboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.stat-card {
+    padding: 1.25rem;
+    background-color: var(--bs-light);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--bs-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .scoreboard-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .scoreboard-filters {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+    
+    .scoreboard-table th, 
+    .scoreboard-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+}

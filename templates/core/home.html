@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ event_name|default:"DCTFd" }} - CTF Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="jumbotron bg-light p-5 rounded mb-5">
+        <h1 class="display-4">Welcome to {{ event_name|default:"DCTFd" }}</h1>
+        {% if event_short_description %}
+            <p class="lead">{{ event_short_description }}</p>
+        {% else %}
+            <p class="lead">A modern Capture The Flag platform built with Django.</p>
+        {% endif %}
+        <hr class="my-4">
+        {% if event_description %}
+            <p>{{ event_description }}</p>
+        {% else %}
+            <p>Challenge yourself, compete with others, and improve your cybersecurity skills.</p>
+        {% endif %}
+        <div class="mt-4">
+            <a class="btn btn-primary btn-lg" href="{% url 'challenges:list' %}" role="button">View Challenges</a>
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+        <!-- User is logged in, show personalized content -->
+    {% else %}
+        <div class="row mb-4 text-center">
+            <div class="col">
+                <a class="btn btn-success btn-lg" href="{% url 'users:register' %}" role="button">
+                    <i class="fas fa-user-plus me-2"></i> Register Now
+                </a>
+                <a class="btn btn-outline-primary btn-lg ms-2" href="{% url 'users:login' %}" role="button">
+                    <i class="fas fa-sign-in-alt me-2"></i> Log In
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    
+</div>
+{% endblock %}

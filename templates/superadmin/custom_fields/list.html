@@ -1,0 +1,125 @@
+{% extends "superadmin/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block dashboard_title %}{% trans "Custom Fields" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{% trans "User Registration Fields" %}</h5>
+    <a href="{% url 'superadmin:create_custom_field' %}?type=user" class="btn btn-sm btn-primary">
+      <i class="fas fa-plus me-1"></i> {% trans "Add User Field" %}
+    </a>
+  </div>
+  <div class="card-body">
+    {% if user_fields %}
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>{% trans "Label" %}</th>
+              <th>{% trans "Type" %}</th>
+              <th>{% trans "Required" %}</th>
+              <th>{% trans "Order" %}</th>
+              <th>{% trans "Actions" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for field in user_fields %}
+              <tr>
+                <td>{{ field.label }}</td>
+                <td>{{ field.get_field_type_display }}</td>
+                <td>
+                  {% if field.required %}
+                    <span class="badge bg-success">{% trans "Yes" %}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{% trans "No" %}</span>
+                  {% endif %}
+                </td>
+                <td>{{ field.order }}</td>
+                <td>
+                  <a href="{% url 'superadmin:edit_custom_field' field.id %}" class="btn btn-sm btn-info">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <a href="{% url 'superadmin:delete_custom_field' field.id %}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        {% trans "No custom fields defined for user registration. Add a field to collect additional information during registration." %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">{% trans "Team Creation Fields" %}</h5>
+    <a href="{% url 'superadmin:create_custom_field' %}?type=team" class="btn btn-sm btn-primary">
+      <i class="fas fa-plus me-1"></i> {% trans "Add Team Field" %}
+    </a>
+  </div>
+  <div class="card-body">
+    {% if team_fields %}
+      <div class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th>{% trans "Label" %}</th>
+              <th>{% trans "Type" %}</th>
+              <th>{% trans "Required" %}</th>
+              <th>{% trans "Order" %}</th>
+              <th>{% trans "Actions" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for field in team_fields %}
+              <tr>
+                <td>{{ field.label }}</td>
+                <td>{{ field.get_field_type_display }}</td>
+                <td>
+                  {% if field.required %}
+                    <span class="badge bg-success">{% trans "Yes" %}</span>
+                  {% else %}
+                    <span class="badge bg-secondary">{% trans "No" %}</span>
+                  {% endif %}
+                </td>
+                <td>{{ field.order }}</td>
+                <td>
+                  <a href="{% url 'superadmin:edit_custom_field' field.id %}" class="btn btn-sm btn-info">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <a href="{% url 'superadmin:delete_custom_field' field.id %}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        {% trans "No custom fields defined for team creation. Add a field to collect additional information when teams are created." %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-4 mb-4">
+  <div class="alert alert-primary">
+    <i class="fas fa-info-circle me-2"></i>
+    {% blocktrans %}
+      Custom fields allow you to collect additional information from users during registration or when creating teams.
+      These fields will appear on registration forms and team creation forms based on your event settings.
+    {% endblocktrans %}
+  </div>
+</div>
+{% endblock %}

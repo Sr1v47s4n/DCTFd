@@ -1,0 +1,38 @@
+{% load i18n %}
+
+<div class="moderator-notice mb-4">
+  <div class="card bg-light">
+    <div class="card-body">
+      <h5 class="card-title">
+        <i class="fas fa-info-circle me-2 text-primary"></i>{% trans "Moderator Permissions" %}
+      </h5>
+      <p class="card-text">
+        {% trans "As a moderator, you have limited permissions to help maintain the CTF platform:" %}
+      </p>
+      <div class="row">
+        <div class="col-md-6">
+          <ul class="mb-0">
+            <li>{% trans "Create and edit challenges" %}</li>
+            <li>{% trans "Modify user data upon request" %}</li>
+            <li>{% trans "Hide content (challenges, categories, etc.)" %}</li>
+            <li>{% trans "Ban users who violate rules" %}</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <ul class="mb-0">
+            <li>{% trans "Review and validate submissions" %}</li>
+            <li>{% trans "Reset user passwords upon request" %}</li>
+            <li>{% trans "Export data for analysis" %}</li>
+            <li>{% trans "Create and manage categories" %}</li>
+          </ul>
+        </div>
+      </div>
+      <p class="card-text mt-3">
+        <small class="text-muted">
+          <i class="fas fa-exclamation-circle me-1"></i>
+          {% trans "Note: For permanent deletions, system-wide changes, or full administrative actions, please contact a Super Admin." %}
+        </small>
+      </p>
+    </div>
+  </div>
+</div>

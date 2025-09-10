@@ -1,0 +1,410 @@
+{% extends "superadmin/base.html" %}
+{% load static %}
+{% load i18n %}
+{% load file_extras %}
+
+{% block title %}{{ title }} | Admin Dashboard{% endblock %}
+
+{% block dashboard_title %}{{ title }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-4">
+  <a href="{% url 'superadmin:challenges' %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left me-2"></i> Back to Challenges
+  </a>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="card dashboard-card">
+  <div class="card-header">
+    <h5 class="mb-0">{{ title }}</h5>
+  </div>
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_name" class="form-label">Challenge Name</label>
+          {{ form.name }}
+          {% if form.name.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.name.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="col-md-6">
+          <label for="id_category" class="form-label">Category</label>
+          {{ form.category }}
+          {% if form.category.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.category.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="id_value" class="form-label">Points</label>
+          {{ form.value }}
+          {% if form.value.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.value.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="col-md-6">
+          <label for="id_difficulty" class="form-label">Difficulty</label>
+          {{ form.difficulty }}
+          {% if form.difficulty.errors %}
+            <div class="invalid-feedback d-block">
+              {% for error in form.difficulty.errors %}
+                {{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="id_description" class="form-label">Description</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.description.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">
+          Markdown supported. Provide a clear description of the challenge with any necessary hints.
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <label for="id_state" class="form-label">State</label>
+        {{ form.state }}
+        {% if form.state.errors %}
+          <div class="invalid-feedback d-block">
+            {% for error in form.state.errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+        <div class="form-text">
+          Controls the visibility state of the challenge.
+        </div>
+      </div>
+      
+      <div class="mb-3">
+        <div class="form-check">
+          {{ form.is_visible }}
+          <label class="form-check-label" for="id_is_visible">
+            Visible
+          </label>
+        </div>
+        <div class="form-text">
+          If checked, this challenge will be visible to participants.
+        </div>
+      </div>
+      
+      <div id="flags-section" class="mb-4">
+        <h5 class="border-bottom pb-2 mb-3">Flags</h5>
+        
+        <div id="flags-container">
+          {{ formset.management_form }}
+          
+          {% for flag_form in formset %}
+            <div class="flag-formset border rounded p-3 mb-3">
+              {% for hidden_field in flag_form.hidden_fields %}
+                {{ hidden_field }}
+              {% endfor %}
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Flag Content</label>
+                  {{ flag_form.flag }}
+                  {% if flag_form.flag.errors %}
+                    <div class="invalid-feedback d-block">
+                      {% for error in flag_form.flag.errors %}
+                        {{ error }}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <div class="col-md-4">
+                  <label class="form-label">Flag Type</label>
+                  {{ flag_form.type }}
+                  {% if flag_form.type.errors %}
+                    <div class="invalid-feedback d-block">
+                      {% for error in flag_form.type.errors %}
+                        {{ error }}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end">
+                  {% if not forloop.first %}
+                    <button type="button" class="btn btn-outline-danger remove-flag-btn">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col">
+                  {% if flag_form.DELETE %}
+                    <div class="form-check">
+                      {{ flag_form.DELETE }}
+                      <label class="form-check-label" for="{{ flag_form.DELETE.id_for_label }}">
+                        Delete this flag
+                      </label>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        
+        <button type="button" id="add-flag-btn" class="btn btn-outline-primary mt-2">
+          <i class="fas fa-plus me-1"></i> Add Another Flag
+        </button>
+      </div>
+      
+      <div id="files-section" class="mb-4">
+        <h5 class="border-bottom pb-2 mb-3">Challenge Files</h5>
+        
+        <div id="files-container">
+          {{ files_formset.management_form }}
+          
+          {% for file_form in files_formset %}
+            <div class="file-formset border rounded p-3 mb-3">
+              {% for hidden_field in file_form.hidden_fields %}
+                {{ hidden_field }}
+              {% endfor %}
+              
+              <div class="row mb-3">
+                <div class="col-md-10">
+                  <label class="form-label">File</label>
+                  {{ file_form.file }}
+                  {% if file_form.file.errors %}
+                    <div class="invalid-feedback d-block">
+                      {% for error in file_form.file.errors %}
+                        {{ error }}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  
+                  {% if file_form.instance.file %}
+                    <div class="mt-2">
+                      <span class="badge bg-secondary">Current file:</span>
+                      <a href="{{ file_form.instance.file.url }}" target="_blank">
+                        {{ file_form.instance.file.name|get_filename }}
+                      </a>
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end">
+                  {% if not forloop.first %}
+                    <button type="button" class="btn btn-outline-danger remove-file-btn">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col">
+                  {% if file_form.DELETE %}
+                    <div class="form-check">
+                      {{ file_form.DELETE }}
+                      <label class="form-check-label" for="{{ file_form.DELETE.id_for_label }}">
+                        Delete this file
+                      </label>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        
+        <button type="button" id="add-file-btn" class="btn btn-outline-primary mt-2">
+          <i class="fas fa-plus me-1"></i> Add Another File
+        </button>
+      </div>
+      
+      <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'superadmin:challenges' %}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Challenge</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // For flag formsets
+    const flagsContainer = document.getElementById('flags-container');
+    const addFlagBtn = document.getElementById('add-flag-btn');
+    const flagTotalForms = document.getElementById('id_flags-TOTAL_FORMS');
+    
+    if(addFlagBtn) {
+      addFlagBtn.addEventListener('click', function() {
+        const formCount = parseInt(flagTotalForms.value);
+        const newForm = flagsContainer.querySelector('.flag-formset').cloneNode(true);
+        
+        // Update form index
+        newForm.innerHTML = newForm.innerHTML.replace(/-\d+-/g, `-${formCount}-`);
+        
+        // Clear input values
+        newForm.querySelectorAll('input[type="text"], select').forEach(input => {
+          input.value = '';
+        });
+        
+        // Add remove button if not already present
+        const buttonCol = newForm.querySelector('.col-md-2');
+        if (!buttonCol.querySelector('.remove-flag-btn')) {
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'btn btn-outline-danger remove-flag-btn';
+          removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+          buttonCol.appendChild(removeBtn);
+        }
+        
+        flagsContainer.appendChild(newForm);
+        flagTotalForms.value = formCount + 1;
+        
+        // Add event listener to the new remove button
+        setupRemoveButtons();
+      });
+    }
+    
+    // For file formsets
+    const filesContainer = document.getElementById('files-container');
+    const addFileBtn = document.getElementById('add-file-btn');
+    const fileTotalForms = document.getElementById('id_files-TOTAL_FORMS');
+    
+    if(addFileBtn) {
+      addFileBtn.addEventListener('click', function() {
+        const formCount = parseInt(fileTotalForms.value);
+        const newForm = filesContainer.querySelector('.file-formset').cloneNode(true);
+        
+        // Update form index
+        newForm.innerHTML = newForm.innerHTML.replace(/-\d+-/g, `-${formCount}-`);
+        
+        // Clear input values
+        newForm.querySelectorAll('input[type="file"]').forEach(input => {
+          input.value = '';
+        });
+        
+        // Remove current file info if exists
+        const currentFileInfo = newForm.querySelector('.mt-2');
+        if (currentFileInfo) {
+          currentFileInfo.remove();
+        }
+        
+        // Add remove button if not already present
+        const buttonCol = newForm.querySelector('.col-md-2');
+        if (!buttonCol.querySelector('.remove-file-btn')) {
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'btn btn-outline-danger remove-file-btn';
+          removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+          buttonCol.appendChild(removeBtn);
+        }
+        
+        filesContainer.appendChild(newForm);
+        fileTotalForms.value = formCount + 1;
+        
+        // Add event listener to the new remove button
+        setupRemoveButtons();
+      });
+    }
+    
+    function setupRemoveButtons() {
+      // Setup flag remove buttons
+      document.querySelectorAll('.remove-flag-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const formset = this.closest('.flag-formset');
+          // Check if this is the only formset
+          if (document.querySelectorAll('.flag-formset').length > 1) {
+            formset.remove();
+            updateFlagForms();
+          }
+        });
+      });
+      
+      // Setup file remove buttons
+      document.querySelectorAll('.remove-file-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const formset = this.closest('.file-formset');
+          // Check if this is the only formset
+          if (document.querySelectorAll('.file-formset').length > 1) {
+            formset.remove();
+            updateFileForms();
+          }
+        });
+      });
+    }
+    
+    function updateFlagForms() {
+      const forms = document.querySelectorAll('.flag-formset');
+      flagTotalForms.value = forms.length;
+      
+      // Update indices
+      forms.forEach((form, index) => {
+        form.querySelectorAll('input, select').forEach(input => {
+          const name = input.getAttribute('name');
+          if (name) {
+            input.setAttribute('name', name.replace(/-\d+-/, `-${index}-`));
+            input.setAttribute('id', name.replace(/-\d+-/, `-${index}-`).replace(/flags-/, 'id_flags-'));
+          }
+        });
+      });
+    }
+    
+    function updateFileForms() {
+      const forms = document.querySelectorAll('.file-formset');
+      fileTotalForms.value = forms.length;
+      
+      // Update indices
+      forms.forEach((form, index) => {
+        form.querySelectorAll('input').forEach(input => {
+          const name = input.getAttribute('name');
+          if (name) {
+            input.setAttribute('name', name.replace(/-\d+-/, `-${index}-`));
+            input.setAttribute('id', name.replace(/-\d+-/, `-${index}-`).replace(/files-/, 'id_files-'));
+          }
+        });
+      });
+    }
+    
+    // Initial setup
+    setupRemoveButtons();
+  });
+</script>
+{% endblock %}

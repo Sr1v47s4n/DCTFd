@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ event_name|default:"DCTFd" }} - CTF Platform{% endblock %}</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    {% if event_favicon_url %}
+    <link rel="icon" href="{{ event_favicon_url }}" type="image/x-icon">
+    {% endif %}
+    {% block extra_css %}{% endblock %}
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --dark-bg: #212529;
+            --light-bg: #f8f9fa;
+        }
+        
+        .bg-dark-gradient {
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+        }
+        
+        .navbar-brand img {
+            max-height: 40px;
+        }
+        
+        .setup-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .setup-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem 0;
+        }
+        
+        .setup-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .setup-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            background-color: #fff;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .setup-section h3 {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+            color: var(--dark-bg);
+        }
+        
+        /* Form styling */
+        .form-label {
+            font-weight: 500;
+        }
+        
+        .form-text {
+            font-size: 0.85rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Color picker custom styling */
+        .color-preview {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+            border: 1px solid #dee2e6;
+        }
+        
+        /* File upload preview */
+        .file-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 0.5rem;
+        }
+        
+        .logo-preview {
+            max-width: 100px;
+            max-height: 100px;
+        }
+        
+        .banner-preview {
+            max-width: 100%;
+            max-height: 150px;
+        }
+        
+        .favicon-preview {
+            max-width: 32px;
+            max-height: 32px;
+        }
+        
+        /* Progress indicator */
+        .setup-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .setup-progress-step {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem 0;
+            position: relative;
+        }
+        
+        .setup-progress-step::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #dee2e6;
+            z-index: -1;
+        }
+        
+        .setup-progress-step:last-child::after {
+            display: none;
+        }
+        
+        .setup-progress-step-num {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            line-height: 2rem;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #dee2e6;
+            margin-bottom: 0.5rem;
+            z-index: 1;
+            position: relative;
+        }
+        
+        .setup-progress-step.active .setup-progress-step-num {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .setup-progress-step.completed .setup-progress-step-num {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        /* Code editor */
+        .code-editor {
+            font-family: monospace;
+            font-size: 0.9rem;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        
+        /* User dropdown in navbar */
+        .navbar-nav .dropdown-menu {
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            border: none;
+            padding: 0.5rem 0;
+        }
+        
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .dropdown-item:active {
+            background-color: var(--primary-color);
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 0.5rem;
+        }
+        
+        .avatar-placeholder {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            color: var(--dark-bg);
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding: 1.5rem 0;
+            width: 100%;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            text-align: center;
+            color: #6c757d;
+            z-index: 1030;
+        }
+        
+        @media (max-width: 768px) {
+            .setup-container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                {% if event_logo_url %}
+                    <img src="{{ event_logo_url }}" alt="{{ event_name }}" class="me-2" style="max-height: 40px;">
+                {% else %}
+                    <i class="fas fa-flag me-2"></i>
+                {% endif %}
+                {{ event_name|default:"DCTFd" }}
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'core:home' %}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'challenges' %}active{% endif %}" href="{% url 'challenges:list' %}">
+                            <i class="fas fa-puzzle-piece"></i> Challenges
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'scoreboard' %}active{% endif %}" href="{% url 'core:scoreboard' %}">
+                            <i class="fas fa-trophy"></i> Scoreboard
+                        </a>
+                    </li>
+                    {% if user.is_authenticated and user.team %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'profile' and request.resolver_match.app_name == 'teams' %}active{% endif %}" href="{% url 'teams:profile' %}">
+                            <i class="fas fa-users"></i> Team
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'rules' %}active{% endif %}" href="{% url 'core:rules' %}">
+                            <i class="fas fa-gavel"></i> Rules
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        {% if is_superadmin %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'superadmin:dashboard' %}">
+                                <i class="fas fa-tachometer-alt"></i> Admin Panel
+                            </a>
+                        </li>
+                        {% elif is_organizer %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'organizer:dashboard' %}">
+                                <i class="fas fa-tachometer-alt"></i> Organizer Panel
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <!-- Notification Bell -->
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link position-relative" href="{% url 'core:notifications' %}" id="notificationDropdown">
+                                <i class="fas fa-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-count" style="display: none;">
+                                    0
+                                </span>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if user.avatar or user.custom_avatar %}
+                                    <img src="{{ user.get_avatar_url }}" alt="{{ user.username }}" class="user-avatar">
+                                {% else %}
+                                    <div class="avatar-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'users:profile' %}">
+                                        <i class="fas fa-user-circle me-2"></i> My Profile
+                                    </a>
+                                </li>
+                                {% if user.team and user.is_team_captain %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'teams:manage' %}">
+                                        <i class="fas fa-users-cog me-2"></i> Manage Team
+                                    </a>
+                                </li>
+                                {% elif not user.team %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'teams:create' %}">
+                                        <i class="fas fa-plus-circle me-2"></i> Create Team
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'teams:join' %}">
+                                        <i class="fas fa-sign-in-alt me-2"></i> Join Team
+                                    </a>
+                                </li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'core:notifications' %}">
+                                        <i class="fas fa-bell me-2"></i> Notifications
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'users:settings' %}">
+                                        <i class="fas fa-cog me-2"></i> Settings
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'users:logout' %}">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Log Out
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:login' %}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:register' %}">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container py-4">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    
+    <footer class="footer mt-5 py-4 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-muted">&copy; 2025 {{ event_name|default:"DCTFd" }} | Developed by Srivatsan Sk</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="d-flex justify-content-center justify-content-md-end">
+                        <a href="#" class="text-muted me-3" title="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-muted me-3" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted me-3" title="Discord"><i class="fab fa-discord"></i></a>
+                        <a href="#" class="text-muted" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Notification container -->
+    <div class="notification-container" id="notificationContainer"></div>
+    
+    <!-- Notification alert modal -->
+    <div class="modal fade" id="notificationAlertModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationAlertTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="notificationAlertMessage">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification banner (hidden by default) -->
+    <div class="notification-banner" id="notificationBanner" style="display: none;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong id="notificationBannerTitle"></strong>
+                    <span id="notificationBannerMessage"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white" aria-label="Close" id="closeBannerBtn"></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio elements for notification sounds -->
+    <audio id="notification-sound-notification" src="https://assets.mixkit.co/sfx/preview/mixkit-notification-alert-951.mp3" preload="auto"></audio>
+    <audio id="notification-sound-success" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" preload="auto"></audio>
+    <audio id="notification-sound-error" src="https://assets.mixkit.co/sfx/preview/mixkit-alert-quick-chime-766.mp3" preload="auto"></audio>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    {% if user.is_authenticated %}
+    <script>
+        // Notification system
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const notificationContainer = document.getElementById('notificationContainer');
+            const notificationBanner = document.getElementById('notificationBanner');
+            const notificationBannerTitle = document.getElementById('notificationBannerTitle');
+            const notificationBannerMessage = document.getElementById('notificationBannerMessage');
+            const closeBannerBtn = document.getElementById('closeBannerBtn');
+            
+            // Alert modal elements
+            const notificationAlertModal = new bootstrap.Modal(document.getElementById('notificationAlertModal'));
+            const notificationAlertTitle = document.getElementById('notificationAlertTitle');
+            const notificationAlertMessage = document.getElementById('notificationAlertMessage');
+            
+            // Close banner button
+            if (closeBannerBtn) {
+                closeBannerBtn.addEventListener('click', function() {
+                    notificationBanner.style.display = 'none';
+                });
+            }
+            
+            // Check for new notifications periodically
+            function checkNotifications() {
+                fetch('{% url "core:notifications" %}', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update notification badge
+                    const notificationCount = document.querySelector('.notification-count');
+                    if (notificationCount) {
+                        if (data.count > 0) {
+                            notificationCount.textContent = data.count > 99 ? '99+' : data.count;
+                            notificationCount.style.display = 'block';
+                        } else {
+                            notificationCount.style.display = 'none';
+                        }
+                    }
+                    
+                    if (data.count > 0) {
+                        processNotifications(data.notifications);
+                    }
+                })
+                .catch(error => console.error('Error checking notifications:', error));
+            }
+            
+            // Process and display notifications
+            function processNotifications(notifications) {
+                notifications.forEach(notification => {
+                    displayNotification(notification);
+                    
+                    // Mark as read via fetch API
+                    fetch('{% url "core:notifications" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': getCsrfToken()
+                        },
+                        body: `notification_id=${notification.id}`
+                    }).catch(error => console.error('Error marking notification as read:', error));
+                });
+            }
+            
+            // Display a notification based on its type
+            function displayNotification(notification) {
+                const { id, title, message, display_type, sound, link } = notification;
+                
+                // Play sound if available
+                if (sound && sound !== 'none') {
+                    playNotificationSound(sound);
+                }
+                
+                // Display based on type
+                switch(display_type) {
+                    case 'toast':
+                        showToastNotification(id, title, message, link);
+                        break;
+                    case 'alert':
+                        showAlertNotification(title, message);
+                        break;
+                    case 'banner':
+                        showBannerNotification(title, message);
+                        break;
+                    case 'push':
+                        showPushNotification(title, message);
+                        break;
+                    default:
+                        showToastNotification(id, title, message, link);
+                }
+            }
+            
+            // Show toast notification
+            function showToastNotification(id, title, message, link) {
+                const toast = document.createElement('div');
+                toast.className = 'notification-toast';
+                toast.innerHTML = `
+                    <div class="toast-header">
+                        <strong class="me-auto">${title}</strong>
+                        <small>just now</small>
+                        <button type="button" class="btn-close" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                        ${link ? `<div class="mt-2"><a href="${link}" class="btn btn-sm btn-primary">View</a></div>` : ''}
+                    </div>
+                `;
+                
+                notificationContainer.appendChild(toast);
+                
+                // Add event listener to close button
+                const closeBtn = toast.querySelector('.btn-close');
+                closeBtn.addEventListener('click', function() {
+                    toast.remove();
+                });
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    toast.classList.add('fade-out');
+                    setTimeout(() => toast.remove(), 500);
+                }, 5000);
+            }
+            
+            // Show alert notification
+            function showAlertNotification(title, message) {
+                notificationAlertTitle.textContent = title;
+                notificationAlertMessage.textContent = message;
+                notificationAlertModal.show();
+            }
+            
+            // Show banner notification
+            function showBannerNotification(title, message) {
+                notificationBannerTitle.textContent = title;
+                notificationBannerMessage.textContent = message;
+                notificationBanner.style.display = 'block';
+                
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    notificationBanner.style.display = 'none';
+                }, 10000);
+            }
+            
+            // Show push notification (browser notification)
+            function showPushNotification(title, message) {
+                // Check if browser supports notifications
+                if (!("Notification" in window)) {
+                    console.log("This browser does not support desktop notifications");
+                    return;
+                }
+                
+                // Request permission if needed
+                if (Notification.permission === "granted") {
+                    const notification = new Notification(title, {
+                        body: message,
+                        icon: "{% static 'img/logo.png' %}"
+                    });
+                    
+                    // Auto-close after 5 seconds
+                    setTimeout(() => notification.close(), 5000);
+                    
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            showPushNotification(title, message);
+                        }
+                    });
+                }
+            }
+            
+            // Play notification sound
+            function playNotificationSound(sound) {
+                const audio = document.getElementById(`notification-sound-${sound}`);
+                if (audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.error('Error playing sound:', e));
+                }
+            }
+            
+            // Get CSRF token
+            function getCsrfToken() {
+                const csrfCookie = document.cookie.split(';')
+                    .find(cookie => cookie.trim().startsWith('csrftoken='));
+                
+                if (csrfCookie) {
+                    return csrfCookie.split('=')[1];
+                }
+                
+                // Fallback: get from meta tag
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                return csrfMeta ? csrfMeta.getAttribute('content') : '';
+            }
+            
+            // Initial check and start periodic checks
+            checkNotifications();
+            setInterval(checkNotifications, 30000); // Check every 30 seconds
+        });
+    </script>
+    {% endif %}
+    
+    <style>
+        /* Notification styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+        
+        .notification-toast {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 10px;
+            overflow: hidden;
+            animation: slide-in 0.3s ease-out forwards;
+        }
+        
+        .notification-toast.fade-out {
+            animation: fade-out 0.5s ease-out forwards;
+        }
+        
+        .notification-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #343a40;
+            color: white;
+            padding: 12px 0;
+            z-index: 9999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Footer Styles */
+        .footer {
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .footer a {
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #3498db !important;
+        }
+        
+        .footer i {
+            font-size: 1.2rem;
+        }
+        
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fade-out {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,214 @@
+{% extends "superadmin/base.html" %}
+
+{% block dashboard_title %}System Logs{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3>System Logs</h3>
+    <div class="btn-group">
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshLogs">
+        <i class="fas fa-sync"></i> Refresh
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="clearLogs">
+        <i class="fas fa-trash"></i> Clear Logs
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="filters mb-4">
+      <div class="row">
+        <div class="col-md-3">
+          <select class="form-select" id="logLevel">
+            <option value="">All Levels</option>
+            <option value="INFO">Info</option>
+            <option value="WARNING">Warning</option>
+            <option value="ERROR">Error</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="DEBUG">Debug</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <input type="text" class="form-control" id="searchLogs" placeholder="Search logs...">
+        </div>
+        <div class="col-md-3">
+          <input type="date" class="form-control" id="logDate">
+        </div>
+        <div class="col-md-3">
+          <button type="button" class="btn btn-secondary w-100" id="applyFilters">Apply Filters</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="log-container">
+      <pre class="log-output bg-dark text-light p-3" style="height: 500px; overflow-y: auto;">
+{{ logs_content }}
+      </pre>
+    </div>
+    
+    <div class="mt-3">
+      <button class="btn btn-primary" id="downloadLogs">
+        <i class="fas fa-download"></i> Download Logs
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get DOM elements
+    const logOutput = document.querySelector('.log-output');
+    const logLevel = document.getElementById('logLevel');
+    const searchLogs = document.getElementById('searchLogs');
+    const logDate = document.getElementById('logDate');
+    const applyFilters = document.getElementById('applyFilters');
+    const refreshLogs = document.getElementById('refreshLogs');
+    const clearLogs = document.getElementById('clearLogs');
+    const downloadLogs = document.getElementById('downloadLogs');
+    
+    // Store original logs
+    const originalLogs = logOutput.textContent;
+    
+    // Set today's date in the date picker
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+    logDate.value = formattedDate;
+    
+    // Highlight different log levels with colors
+    function highlightLogLevels() {
+      let logText = logOutput.innerHTML;
+      
+      // Highlight INFO logs
+      logText = logText.replace(/\[INFO\]/g, '<span style="color: #3498db;">[INFO]</span>');
+      
+      // Highlight WARNING logs
+      logText = logText.replace(/\[WARNING\]/g, '<span style="color: #f39c12;">[WARNING]</span>');
+      
+      // Highlight ERROR logs
+      logText = logText.replace(/\[ERROR\]/g, '<span style="color: #e74c3c;">[ERROR]</span>');
+      
+      // Highlight CRITICAL logs
+      logText = logText.replace(/\[CRITICAL\]/g, '<span style="color: #9b59b6;">[CRITICAL]</span>');
+      
+      // Highlight DEBUG logs
+      logText = logText.replace(/\[DEBUG\]/g, '<span style="color: #2ecc71;">[DEBUG]</span>');
+      
+      logOutput.innerHTML = logText;
+    }
+    
+    // Apply highlighting initially
+    highlightLogLevels();
+    
+    // Apply filters
+    applyFilters.addEventListener('click', function() {
+      filterLogs();
+    });
+    
+    // Filter logs based on selected criteria
+    function filterLogs() {
+      // Reset to original logs
+      logOutput.textContent = originalLogs;
+      
+      // Get filter values
+      const level = logLevel.value;
+      const search = searchLogs.value.toLowerCase();
+      const date = logDate.value ? logDate.value.replace(/-/g, '-') : '';
+      
+      // Split logs by line
+      let logs = logOutput.textContent.split('\n');
+      
+      // Apply filters
+      if (level || search || date) {
+        logs = logs.filter(log => {
+          // Check level filter
+          if (level && !log.includes(`[${level}]`)) {
+            return false;
+          }
+          
+          // Check search filter
+          if (search && !log.toLowerCase().includes(search)) {
+            return false;
+          }
+          
+          // Check date filter
+          if (date && !log.includes(date)) {
+            return false;
+          }
+          
+          return true;
+        });
+      }
+      
+      // Update log display
+      logOutput.textContent = logs.join('\n');
+      
+      // Re-apply highlighting
+      highlightLogLevels();
+    }
+    
+    // Refresh logs
+    refreshLogs.addEventListener('click', function() {
+      // Reload the page to get fresh logs
+      window.location.reload();
+    });
+    
+    // Clear logs functionality (requires AJAX)
+    clearLogs.addEventListener('click', function() {
+      if (confirm('Are you sure you want to clear all logs? This cannot be undone.')) {
+        // Send AJAX request to clear logs
+        fetch('/superadmin/logs/clear/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            logOutput.textContent = '[' + new Date().toISOString().replace('T', ' ').substr(0, 19) + '] [INFO] Logs cleared by admin';
+            highlightLogLevels();
+          } else {
+            alert('Failed to clear logs: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while clearing logs.');
+        });
+      }
+    });
+    
+    // Download logs
+    downloadLogs.addEventListener('click', function() {
+      const blob = new Blob([logOutput.textContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'system_logs_' + new Date().toISOString().substr(0, 10) + '.log';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+    
+    // Helper function to get CSRF token from cookies
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  });
+</script>
+{% endblock %}

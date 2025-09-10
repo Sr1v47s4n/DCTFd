@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | {{ event_name|default:"DCTFd" }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% load static %}
+    {% load avatar_tags %}
+    <link rel="stylesheet" href="{% static 'css/components/authentication.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components/avatar-selector.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Custom styles for avatar selection in register form */
+        .avatar-selection-section {
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .avatar-options-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-top: 1rem;
+        }
+        
+        /* Make avatars a bit smaller on register page */
+        .avatar-option {
+            width: 70px;
+            height: 70px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card auth-card-wide">
+            <div class="auth-header">
+                <div class="auth-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                </div>
+                <h1>Join {{ event_name|default:"DCTFd" }}</h1>
+                <p>Create your account to participate in CTF challenges</p>
+            </div>
+            
+            <div class="auth-body">
+                {% load static %}
+                {% load form_utils %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="auth-alert auth-alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="auth-grid">
+                        <div class="auth-form-group">
+                            <label for="{{ form.username.id_for_label }}" class="auth-label">{{ form.username.label }}</label>
+                            <input type="text" 
+                                   class="auth-input {% if form.username.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.username.id_for_label }}" 
+                                   name="{{ form.username.name }}" 
+                                   value="{{ form.username.value|default:'' }}"
+                                   placeholder="Choose a unique username"
+                                   required>
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="auth-form-group">
+                            <label for="{{ form.email.id_for_label }}" class="auth-label">{{ form.email.label }}</label>
+                            <input type="email" 
+                                   class="auth-input {% if form.email.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.email.id_for_label }}" 
+                                   name="{{ form.email.name }}" 
+                                   value="{{ form.email.value|default:'' }}"
+                                   placeholder="Enter your email address"
+                                   required>
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Personal Information -->
+                    <div class="auth-grid">
+                        <div class="auth-form-group">
+                            <label for="{{ form.first_name.id_for_label }}" class="auth-label">{{ form.first_name.label }}</label>
+                            <input type="text" 
+                                   class="auth-input {% if form.first_name.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.first_name.id_for_label }}" 
+                                   name="{{ form.first_name.name }}" 
+                                   value="{{ form.first_name.value|default:'' }}"
+                                   placeholder="Enter your first name"
+                                   required>
+                            {% if form.first_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.first_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="auth-form-group">
+                            <label for="{{ form.last_name.id_for_label }}" class="auth-label">{{ form.last_name.label }}</label>
+                            <input type="text" 
+                                   class="auth-input {% if form.last_name.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.last_name.id_for_label }}" 
+                                   name="{{ form.last_name.name }}" 
+                                   value="{{ form.last_name.value|default:'' }}"
+                                   placeholder="Enter your last name"
+                                   required>
+                            {% if form.last_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.last_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="auth-grid">
+                        <div class="auth-form-group">
+                            <label for="{{ form.phone.id_for_label }}" class="auth-label">{{ form.phone.label }}</label>
+                            <input type="tel" 
+                                   class="auth-input {% if form.phone.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.phone.id_for_label }}" 
+                                   name="{{ form.phone.name }}" 
+                                   value="{{ form.phone.value|default:'' }}"
+                                   placeholder="Enter your phone number">
+                            {% if form.phone.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.phone.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="auth-form-group">
+                            <label for="{{ form.country.id_for_label }}" class="auth-label">{{ form.country.label }}</label>
+                            <select class="auth-input {% if form.country.errors %}is-invalid{% endif %}" 
+                                    id="{{ form.country.id_for_label }}" 
+                                    name="{{ form.country.name }}"
+                                    required>
+                                <option value="">Select your country</option>
+                                {% for value, label in form.country.field.choices %}
+                                    {% if value %}
+                                        <option value="{{ value }}" {% if form.country.value == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            {% if form.country.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.country.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Gender -->
+                    <div class="auth-form-group">
+                        <label for="{{ form.gender.id_for_label }}" class="auth-label">{{ form.gender.label }}</label>
+                        <select class="auth-input {% if form.gender.errors %}is-invalid{% endif %}" 
+                                id="{{ form.gender.id_for_label }}" 
+                                name="{{ form.gender.name }}">
+                            <option value="">Select your gender (optional)</option>
+                            {% for value, label in form.gender.field.choices %}
+                                {% if value %}
+                                    <option value="{{ value }}" {% if form.gender.value == value %}selected{% endif %}>{{ label }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        {% if form.gender.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.gender.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Avatar Selection -->
+                    <div class="auth-form-group avatar-selection-section">
+                        <label class="auth-label">Choose Your Avatar</label>
+                        {% render_avatar_selection form.avatar %}
+                        {% if form.avatar.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.avatar.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Custom Fields Section -->
+                    {% if custom_field_definitions %}
+                        <div class="custom-fields-section">
+                            <h3 class="custom-fields-title">Additional Information</h3>
+                            {% for field in custom_field_definitions %}
+                                <div class="auth-form-group">
+                                    <label for="custom_{{ field.id }}" class="auth-label">
+                                        {{ field.label }}{% if field.required %} <span style="color: var(--auth-danger);">*</span>{% endif %}
+                                    </label>
+                                    {% if field.field_type == 'text' %}
+                                        <input type="text" 
+                                               class="auth-input" 
+                                               id="custom_{{ field.id }}" 
+                                               name="custom_fields[{{ field.id }}]" 
+                                               placeholder="{{ field.placeholder }}"
+                                               {% if field.required %}required{% endif %}>
+                                    {% elif field.field_type == 'textarea' %}
+                                        <textarea class="auth-input" 
+                                                  id="custom_{{ field.id }}" 
+                                                  name="custom_fields[{{ field.id }}]" 
+                                                  placeholder="{{ field.placeholder }}"
+                                                  rows="3"
+                                                  {% if field.required %}required{% endif %}></textarea>
+                                    {% elif field.field_type == 'number' %}
+                                        <input type="number" 
+                                               class="auth-input" 
+                                               id="custom_{{ field.id }}" 
+                                               name="custom_fields[{{ field.id }}]" 
+                                               {% if field.required %}required{% endif %}>
+                                    {% endif %}
+                                    {% if field.description %}
+                                        <small style="color: var(--auth-text-muted); font-size: 0.875rem;">{{ field.description }}</small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Password -->
+                    <div class="auth-grid">
+                        <div class="auth-form-group">
+                            <label for="{{ form.password1.id_for_label }}" class="auth-label">{{ form.password1.label }}</label>
+                            <input type="password" 
+                                   class="auth-input {% if form.password1.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.password1.id_for_label }}" 
+                                   name="{{ form.password1.name }}" 
+                                   placeholder="Create a strong password"
+                                   required>
+                            {% if form.password1.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password1.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="auth-form-group">
+                            <label for="{{ form.password2.id_for_label }}" class="auth-label">{{ form.password2.label }}</label>
+                            <input type="password" 
+                                   class="auth-input {% if form.password2.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.password2.id_for_label }}" 
+                                   name="{{ form.password2.name }}" 
+                                   placeholder="Confirm your password"
+                                   required>
+                            {% if form.password2.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password2.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Terms and Conditions -->
+                    <div class="auth-checkbox">
+                        <input type="checkbox" id="terms" name="terms" required>
+                        <label for="terms">I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a></label>
+                    </div>
+                    
+                    <button type="submit" class="auth-btn">Create Account</button>
+                </form>
+            </div>
+            
+            <div class="auth-footer">
+                Already have an account? <a href="{% url 'users:login' %}" class="auth-link">Sign in instead</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/avatar-selection.js' %}"></script>
+</body>
+</html>

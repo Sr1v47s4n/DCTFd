@@ -1,0 +1,177 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/layout/user-dashboard.css" %}">{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    {% if is_dev_mode %}
+    <div class="dev-mode-banner">
+        <strong>Development Mode Enabled</strong> - Using default configurations and test data
+    </div>
+    {% endif %}
+    
+    <div class="app-dashboard module">
+        <h2>DCTFd Dashboard</h2>
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <h3>Events</h3>
+                <div class="stat-number">{{ event_count }}</div>
+                <div class="stat-action"><a href="{% url 'admin:event_event_changelist' %}">Manage Events</a></div>
+            </div>
+            
+            <div class="stat-box">
+                <h3>Users</h3>
+                <div class="stat-number">{{ user_count }}</div>
+                <div class="stat-meta">{{ new_users_today }} new today</div>
+                <div class="stat-action"><a href="{% url 'admin:users_user_changelist' %}">Manage Users</a></div>
+            </div>
+            
+            <div class="stat-box">
+                <h3>Teams</h3>
+                <div class="stat-number">{{ team_count }}</div>
+                <div class="stat-action"><a href="{% url 'admin:teams_team_changelist' %}">Manage Teams</a></div>
+            </div>
+            
+            <div class="stat-box">
+                <h3>Challenges</h3>
+                <div class="stat-number">{{ challenge_count }}</div>
+                <div class="stat-meta">{{ solve_count }} solves total</div>
+                <div class="stat-action"><a href="{% url 'admin:challenges_challenge_changelist' %}">Manage Challenges</a></div>
+            </div>
+        </div>
+        
+        <h3>Recent Events</h3>
+        <table class="result-list">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td><a href="{% url 'admin:event_event_change' event.id %}">{{ event.name }}</a></td>
+                    <td>{{ event.start_time }}</td>
+                    <td>{{ event.end_time }}</td>
+                    <td>
+                        {% if event.is_ongoing %}
+                            <span class="status-badge ongoing">Ongoing</span>
+                        {% elif event.is_upcoming %}
+                            <span class="status-badge upcoming">Upcoming</span>
+                        {% else %}
+                            <span class="status-badge ended">Ended</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No events found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <h3>Recent User Activity</h3>
+        <table class="result-list">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Activity</th>
+                    <th>Time</th>
+                    <th>IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for activity in recent_activity %}
+                <tr>
+                    <td><a href="{% url 'admin:users_user_change' activity.user.id %}">{{ activity.user.username }}</a></td>
+                    <td>{{ activity.activity_type }}</td>
+                    <td>{{ activity.created_at }}</td>
+                    <td>{{ activity.ip_address }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No recent activity</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="quick-actions-module">
+        <h2>Quick Actions</h2>
+        <ul class="actionlist">
+            <li>
+                <a href="{% url 'admin:event_event_add' %}">
+                    <span class="icon">➕</span> Create new event
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin:challenges_challenge_add' %}">
+                    <span class="icon">➕</span> Add new challenge
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin:users_user_add' %}">
+                    <span class="icon">➕</span> Add new user
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin:teams_team_add' %}">
+                    <span class="icon">➕</span> Create new team
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin:event_eventannouncement_add' %}">
+                    <span class="icon">📢</span> Post announcement
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin:core_config_changelist' %}">
+                    <span class="icon">⚙️</span> System configuration
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    {% if user.is_superuser %}
+    <div class="module" id="admin-actions-module">
+        <h2>Admin Actions</h2>
+        <ul class="actionlist">
+            <li>
+                <a href="{% url 'admin:superadmin_systemlog_changelist' %}">
+                    <span class="icon">📋</span> System logs
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin:users_user_changelist' %}">
+                    <span class="icon">�</span> Manage users
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin:core_config_changelist' %}">
+                    <span class="icon">⚙️</span> Core settings
+                </a>
+            </li>
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends 'superadmin/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% translate "Import/Export" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{% translate "Import/Export Data" %}</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'superadmin:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active">{% translate "Import/Export" %}</li>
+    </ol>
+
+    <div class="row">
+        <!-- Export Options -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-download me-1"></i>
+                    {% translate "Export Data" %}
+                </div>
+                <div class="card-body">
+                    <h5>{% translate "Export All Data (JSON)" %}</h5>
+                    <p>{% translate "Export all database tables to a ZIP file containing JSON files. This is useful for complete backups." %}</p>
+                    <a href="{% url 'superadmin:export_json' %}" class="btn btn-primary">
+                        <i class="fas fa-download me-1"></i> {% translate "Export All Data (JSON)" %}
+                    </a>
+                    
+                    <hr>
+                    
+                    <h5>{% translate "Export Specific Data (CSV)" %}</h5>
+                    <p>{% translate "Export specific data to CSV format. Choose from the options below:" %}</p>
+                    
+                    <div class="list-group">
+                        {% for model in exportable_models %}
+                        <a href="{% url 'superadmin:export_csv' model.value %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ model.name }}</h6>
+                                <small><i class="fas fa-file-csv"></i></small>
+                            </div>
+                            <small>{{ model.description }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Import Options -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-upload me-1"></i>
+                    {% translate "Import Data" %}
+                </div>
+                <div class="card-body">
+                    <h5>{% translate "Import Data from JSON" %}</h5>
+                    <p>{% translate "Import data from a JSON file or ZIP archive containing JSON files. This will replace existing data." %}</p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        {% translate "Warning: Importing JSON data will replace existing data. Make sure to back up your database before proceeding." %}
+                    </div>
+                    
+                    <form method="post" action="{% url 'superadmin:import_json' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="json_file" class="form-label">{% translate "JSON File or ZIP Archive" %}</label>
+                            <input class="form-control" type="file" id="json_file" name="json_file" accept=".json,.zip" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-upload me-1"></i> {% translate "Import from JSON" %}
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <h5>{% translate "Import Data from CSV" %}</h5>
+                    <p>{% translate "Import specific data from CSV files. Choose from the options below:" %}</p>
+                    
+                    <div class="accordion" id="importAccordion">
+                        {% for model in exportable_models %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ model.value }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ model.value }}" aria-expanded="false" aria-controls="collapse{{ model.value }}">
+                                    {{ model.name }}
+                                </button>
+                            </h2>
+                            <div id="collapse{{ model.value }}" class="accordion-collapse collapse" aria-labelledby="heading{{ model.value }}" data-bs-parent="#importAccordion">
+                                <div class="accordion-body">
+                                    <form method="post" action="{% url 'superadmin:import_csv' model.value %}" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label for="csv_file_{{ model.value }}" class="form-label">{% translate "CSV File" %}</label>
+                                            <input class="form-control" type="file" id="csv_file_{{ model.value }}" name="csv_file" accept=".csv" required>
+                                            <div class="form-text">{% translate "The CSV file should have the same column headers as the exported CSV." %}</div>
+                                        </div>
+                                        
+                                        {% if model.value != 'users' %}
+                                        <div class="mb-3 form-check">
+                                            <input type="checkbox" class="form-check-input" id="clear_existing_{{ model.value }}" name="clear_existing" value="yes">
+                                            <label class="form-check-label" for="clear_existing_{{ model.value }}">
+                                                {% translate "Clear existing data before import" %}
+                                            </label>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <button type="submit" class="btn btn-warning">
+                                            <i class="fas fa-upload me-1"></i> {% translate "Import" %} {{ model.name }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Best Practices -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    {% translate "Import/Export Best Practices" %}
+                </div>
+                <div class="card-body">
+                    <h5>{% translate "Tips for Data Import and Export" %}</h5>
+                    <ul>
+                        <li>{% translate "Always back up your database before importing data." %}</li>
+                        <li>{% translate "JSON export/import is preferred for complete system backups as it preserves all relationships." %}</li>
+                        <li>{% translate "CSV export/import is better for targeted data transfers or modifications." %}</li>
+                        <li>{% translate "When importing users from CSV, existing users will be updated but not deleted." %}</li>
+                        <li>{% translate "For other CSV imports, check 'Clear existing data' to replace all records, or leave unchecked to add/update." %}</li>
+                        <li>{% translate "For challenge imports, related flags will be automatically created." %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock dashboard_content %}

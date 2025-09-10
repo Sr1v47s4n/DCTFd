@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Event Registration Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        .event-info {
+            background-color: #e9f7fe;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Registration Confirmation</h2>
+        </div>
+        
+        <p>Hi {{ user.first_name }},</p>
+        
+        <p>Thank you for registering for <strong>{{ event.name }}</strong>. Your registration has been confirmed!</p>
+        
+        <div class="event-info">
+            <h3>{{ event.name }}</h3>
+            <p><strong>Date:</strong> {{ event.start_time|date:"F j, Y, g:i a" }} - {{ event.end_time|date:"F j, Y, g:i a" }}</p>
+            <p><strong>Format:</strong> {{ event.get_format_display }}</p>
+            {% if event.location %}
+                <p><strong>Location:</strong> {{ event.location }}</p>
+            {% endif %}
+        </div>
+        
+        <p>Here's what you need to know:</p>
+        
+        <ul>
+            <li>Make sure you have a team or create one before the event starts</li>
+            <li>Review the event rules and guidelines</li>
+            <li>Prepare your tools and environment</li>
+            <li>Check the event page for any updates or announcements</li>
+        </ul>
+        
+        <p style="text-align: center;">
+            <a href="{{ protocol }}://{{ domain }}{% url 'event:detail' event.slug %}" class="button">View Event Details</a>
+        </p>
+        
+        <p>We look forward to your participation!</p>
+        
+        <p>Best regards,<br>The DCTFd Team</p>
+        
+        <div class="footer">
+            <p>&copy; {% now "Y" %} DCTFd. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,557 @@
+{% extends 'organizer/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block dashboard_title %}{% trans "Scoreboard" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+  <div class="dashboard-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3><i class="fas fa-trophy me-2"></i>{% trans "Scoreboard" %}</h3>
+      <div class="header-actions">
+        <div class="btn-group">
+          <a href="{% url 'organizer:export_scoreboard' %}" class="btn btn-primary">
+            <i class="fas fa-download me-2"></i>{% trans "Export" %}
+          </a>
+          <div class="ms-2 text-muted d-flex align-items-center">
+            <span class="badge bg-info me-2">
+              <i class="fas fa-info-circle"></i>
+            </span>
+            <small>{% trans "Only Super Admins can modify scoreboard settings" %}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card-body">
+      <!-- Scoreboard Controls -->
+      <div class="scoreboard-controls mb-4">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input type="text" class="form-control" id="teamSearch" placeholder="{% trans 'Search teams...' %}">
+            </div>
+          </div>
+          
+          <div class="col-md-3">
+            <select class="form-select" id="challengeFilter">
+              <option value="">{% trans "All Challenges" %}</option>
+              {% for challenge in challenges %}
+              <option value="{{ challenge.id }}">{{ challenge.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-md-3">
+            <select class="form-select" id="categoryFilter">
+              <option value="">{% trans "All Categories" %}</option>
+              {% for category in categories %}
+              <option value="{{ category }}">{{ category }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-md-2">
+            <button type="button" class="btn btn-outline-secondary w-100" id="refreshScoreboard">
+              <i class="fas fa-sync-alt me-2"></i>{% trans "Refresh" %}
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Scoreboard Stats -->
+      <div class="scoreboard-stats mb-4">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="stat-card bg-primary text-white">
+              <div class="card-body">
+                <h5>{% trans "Total Teams" %}</h5>
+                <h2 class="stat-value">{{ teams_count }}</h2>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-3">
+            <div class="stat-card bg-success text-white">
+              <div class="card-body">
+                <h5>{% trans "Challenges Solved" %}</h5>
+                <h2 class="stat-value">{{ solved_challenges_count }}/{{ challenges_count }}</h2>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-3">
+            <div class="stat-card bg-info text-white">
+              <div class="card-body">
+                <h5>{% trans "Total Submissions" %}</h5>
+                <h2 class="stat-value">{{ total_submissions_count }}</h2>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-3">
+            <div class="stat-card bg-warning text-white">
+              <div class="card-body">
+                <h5>{% trans "Solve Rate" %}</h5>
+                <h2 class="stat-value">{{ solve_rate }}%</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Scoreboard Table -->
+      <div class="table-responsive">
+        <table class="table table-hover" id="scoreboardTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans "Team" %}</th>
+              <th>{% trans "Score" %}</th>
+              <th>{% trans "Last Solve" %}</th>
+              <th>{% trans "Progress" %}</th>
+              <th>{% trans "Details" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for team in teams %}
+            <tr class="scoreboard-row" data-team-id="{{ team.id }}">
+              <td class="text-center">
+                {% if forloop.counter == 1 %}
+                <div class="ranking ranking-first">1</div>
+                {% elif forloop.counter == 2 %}
+                <div class="ranking ranking-second">2</div>
+                {% elif forloop.counter == 3 %}
+                <div class="ranking ranking-third">3</div>
+                {% else %}
+                <div class="ranking">{{ forloop.counter }}</div>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  {% if team.avatar %}
+                  <img src="{{ team.avatar.url }}" alt="{{ team.name }}" class="team-avatar me-2">
+                  {% else %}
+                  <div class="team-avatar-placeholder me-2">{{ team.name|slice:":1" }}</div>
+                  {% endif %}
+                  <div>
+                    <div>{{ team.name }}</div>
+                    {% if team.country %}
+                    <small class="text-muted">{{ team.get_country_display }}</small>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="score">{{ team.score }}</span>
+              </td>
+              <td>
+                {% if team.last_solve %}
+                <span title="{{ team.last_solve|date:'Y-m-d H:i:s' }}">
+                  {{ team.last_solve|date:"M d, H:i" }}
+                </span>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar" role="progressbar" style="width: {{ team.progress }}%;" aria-valuenow="{{ team.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted">{{ team.solved_count }}/{{ challenges_count }} ({{ team.progress }}%)</small>
+              </td>
+              <td>
+                <button type="button" class="btn btn-sm btn-outline-primary team-details-btn" data-team-id="{{ team.id }}">
+                  <i class="fas fa-chart-bar me-1"></i>{% trans "Details" %}
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-5">
+                <div class="empty-state">
+                  <i class="fas fa-trophy fa-3x text-muted mb-3"></i>
+                  <h4>{% trans "No Scores Yet" %}</h4>
+                  <p class="text-muted">{% trans "No teams have solved any challenges yet." %}</p>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="dashboard-card mt-4 team-details-card d-none">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 id="teamDetailsTitle">{% trans "Team Details" %}: <span class="team-name"></span></h3>
+      <button type="button" class="btn-close close-team-details" aria-label="Close"></button>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="team-info-card mb-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="team-avatar-large me-3" id="teamDetailsAvatar"></div>
+              <div>
+                <h4 class="team-name mb-1"></h4>
+                <div class="team-meta">
+                  <span class="badge bg-secondary me-2" id="teamDetailsMembers"></span>
+                  <span class="text-muted" id="teamDetailsCountry"></span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="team-stats mb-3">
+              <div class="row">
+                <div class="col-6">
+                  <div class="stat-label">{% trans "Score" %}</div>
+                  <div class="stat-value" id="teamDetailsScore"></div>
+                </div>
+                <div class="col-6">
+                  <div class="stat-label">{% trans "Rank" %}</div>
+                  <div class="stat-value" id="teamDetailsRank"></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="team-progress mb-3">
+              <div class="progress-label d-flex justify-content-between">
+                <span>{% trans "Progress" %}</span>
+                <span id="teamDetailsProgress"></span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar" role="progressbar" id="teamDetailsProgressBar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            
+            <div class="categories-progress">
+              <h6 class="mb-2">{% trans "Categories Progress" %}</h6>
+              <div id="categoriesProgressContainer">
+                <!-- Will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-8">
+          <h5 class="mb-3">{% trans "Solved Challenges" %}</h5>
+          <div class="table-responsive">
+            <table class="table table-sm" id="teamSolvesTable">
+              <thead>
+                <tr>
+                  <th>{% trans "Challenge" %}</th>
+                  <th>{% trans "Category" %}</th>
+                  <th>{% trans "Points" %}</th>
+                  <th>{% trans "Solved Time" %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scoreboard Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="settingsModalLabel">{% trans "Scoreboard Settings" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="scoreboardSettingsForm" action="{% url 'organizer:update_scoreboard_settings' %}" method="post">
+          {% csrf_token %}
+          
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="scoreboardVisible" name="scoreboard_visible" {% if event.scoreboard_visible %}checked{% endif %}>
+            <label class="form-check-label" for="scoreboardVisible">
+              {% trans "Scoreboard Visible to Participants" %}
+            </label>
+            <div class="form-text">{% trans "Controls whether participants can see the scoreboard" %}</div>
+          </div>
+          
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="freezeScoreboard" name="freeze_scoreboard" {% if event.freeze_scoreboard %}checked{% endif %}>
+            <label class="form-check-label" for="freezeScoreboard">
+              {% trans "Freeze Scoreboard" %}
+            </label>
+            <div class="form-text">{% trans "Freezes the public scoreboard at the specified time" %}</div>
+          </div>
+          
+          <div class="mb-3" id="freezeTimeGroup">
+            <label for="freezeTime" class="form-label">{% trans "Freeze Time" %}</label>
+            <input type="datetime-local" class="form-control" id="freezeTime" name="freeze_time" value="{{ event.freeze_time|date:'Y-m-d\TH:i' }}">
+            <div class="form-text">{% trans "When to freeze the scoreboard (leave empty for no freeze)" %}</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+        <button type="submit" form="scoreboardSettingsForm" class="btn btn-primary">
+          <i class="fas fa-save me-2"></i>{% trans "Save Settings" %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Scoreboard filtering
+    const teamSearch = document.getElementById('teamSearch');
+    const challengeFilter = document.getElementById('challengeFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const refreshBtn = document.getElementById('refreshScoreboard');
+    const teamRows = document.querySelectorAll('.scoreboard-row');
+    
+    // Freeze time visibility
+    const freezeScoreboardCheck = document.getElementById('freezeScoreboard');
+    const freezeTimeGroup = document.getElementById('freezeTimeGroup');
+    
+    if (freezeScoreboardCheck) {
+      freezeScoreboardCheck.addEventListener('change', function() {
+        freezeTimeGroup.style.display = this.checked ? 'block' : 'none';
+      });
+      
+      // Initial state
+      freezeTimeGroup.style.display = freezeScoreboardCheck.checked ? 'block' : 'none';
+    }
+    
+    // Team details functionality
+    const teamDetailsButtons = document.querySelectorAll('.team-details-btn');
+    const teamDetailsCard = document.querySelector('.team-details-card');
+    const closeTeamDetailsBtn = document.querySelector('.close-team-details');
+    
+    teamDetailsButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const teamId = this.getAttribute('data-team-id');
+        loadTeamDetails(teamId);
+      });
+    });
+    
+    closeTeamDetailsBtn.addEventListener('click', function() {
+      teamDetailsCard.classList.add('d-none');
+    });
+    
+    function loadTeamDetails(teamId) {
+      // This would typically be an AJAX call to get team details
+      // For now, we'll simulate it with data already on the page
+      
+      const teamRow = document.querySelector(`.scoreboard-row[data-team-id="${teamId}"]`);
+      if (!teamRow) return;
+      
+      const teamName = teamRow.querySelector('td:nth-child(2) div div:first-child').textContent.trim();
+      const teamScore = teamRow.querySelector('.score').textContent.trim();
+      const teamRank = teamRow.querySelector('.ranking').textContent.trim();
+      const teamProgress = teamRow.querySelector('small').textContent.trim();
+      const progressPercent = teamRow.querySelector('.progress-bar').style.width;
+      
+      // Update team details card
+      document.querySelector('.team-details-card .team-name').textContent = teamName;
+      document.getElementById('teamDetailsTitle').innerHTML = `{% trans "Team Details" %}: <span class="team-name">${teamName}</span>`;
+      
+      // This would be populated with actual data from an API
+      document.getElementById('teamDetailsMembers').textContent = '4 Members';
+      document.getElementById('teamDetailsCountry').textContent = 'United States';
+      document.getElementById('teamDetailsScore').textContent = teamScore;
+      document.getElementById('teamDetailsRank').textContent = teamRank;
+      document.getElementById('teamDetailsProgress').textContent = teamProgress;
+      document.getElementById('teamDetailsProgressBar').style.width = progressPercent;
+      document.getElementById('teamDetailsProgressBar').setAttribute('aria-valuenow', progressPercent.replace('%', ''));
+      
+      // Placeholder for avatar - in real implementation, this would be the actual avatar
+      const avatarContainer = document.getElementById('teamDetailsAvatar');
+      avatarContainer.innerHTML = `<div class="team-avatar-placeholder">${teamName.charAt(0)}</div>`;
+      
+      // Simulate category progress data - in real implementation, this would come from the server
+      const categories = [
+        { name: 'Web', solved: 3, total: 5, percent: 60 },
+        { name: 'Crypto', solved: 2, total: 4, percent: 50 },
+        { name: 'Forensics', solved: 1, total: 3, percent: 33 },
+        { name: 'Reversing', solved: 0, total: 2, percent: 0 },
+      ];
+      
+      // Populate categories progress
+      const categoriesContainer = document.getElementById('categoriesProgressContainer');
+      categoriesContainer.innerHTML = '';
+      
+      categories.forEach(category => {
+        const categoryHtml = `
+          <div class="category-progress mb-2">
+            <div class="d-flex justify-content-between mb-1">
+              <small>${category.name}</small>
+              <small>${category.solved}/${category.total}</small>
+            </div>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar" role="progressbar" style="width: ${category.percent}%;" 
+                   aria-valuenow="${category.percent}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+        `;
+        categoriesContainer.innerHTML += categoryHtml;
+      });
+      
+      // Simulate solves data - in real implementation, this would come from the server
+      const solves = [
+        { name: 'Easy Web', category: 'Web', points: 100, time: '2023-04-15 14:30:22' },
+        { name: 'Cookie Monster', category: 'Web', points: 200, time: '2023-04-15 16:45:10' },
+        { name: 'SQL Injection 101', category: 'Web', points: 150, time: '2023-04-16 09:12:05' },
+        { name: 'Basic Encryption', category: 'Crypto', points: 100, time: '2023-04-16 11:30:45' },
+        { name: 'RSA Basics', category: 'Crypto', points: 250, time: '2023-04-17 15:20:18' },
+        { name: 'File Recovery', category: 'Forensics', points: 200, time: '2023-04-18 10:05:33' },
+      ];
+      
+      // Populate solves table
+      const solvesTableBody = document.querySelector('#teamSolvesTable tbody');
+      solvesTableBody.innerHTML = '';
+      
+      solves.forEach(solve => {
+        const solveRow = `
+          <tr>
+            <td>${solve.name}</td>
+            <td><span class="badge bg-secondary">${solve.category}</span></td>
+            <td>${solve.points}</td>
+            <td>${new Date(solve.time).toLocaleString()}</td>
+          </tr>
+        `;
+        solvesTableBody.innerHTML += solveRow;
+      });
+      
+      // Show the details card
+      teamDetailsCard.classList.remove('d-none');
+      
+      // Scroll to the details card
+      teamDetailsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    // Search functionality
+    teamSearch.addEventListener('input', filterScoreboard);
+    challengeFilter.addEventListener('change', filterScoreboard);
+    categoryFilter.addEventListener('change', filterScoreboard);
+    
+    function filterScoreboard() {
+      // This would typically be an AJAX call to filter the scoreboard
+      // For now, we'll just simulate filtering on the client side
+      console.log('Filtering scoreboard...');
+      console.log('Search:', teamSearch.value);
+      console.log('Challenge:', challengeFilter.value);
+      console.log('Category:', categoryFilter.value);
+    }
+    
+    // Refresh functionality
+    refreshBtn.addEventListener('click', function() {
+      location.reload();
+    });
+  });
+</script>
+{% endblock %}
+  .ranking {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin: 0 auto;
+  }
+  
+  .ranking-first {
+    background-color: #FFD700;
+    color: #212529;
+  }
+  
+  .ranking-second {
+    background-color: #C0C0C0;
+    color: #212529;
+  }
+  
+  .ranking-third {
+    background-color: #CD7F32;
+    color: white;
+  }
+  
+  .team-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .team-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  .team-avatar-large {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .team-avatar-large .team-avatar-placeholder {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  .team-info-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .team-stats {
+    margin-top: 15px;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+  }
+  
+  .team-stats .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .progress-label {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  .category-progress .progress-bar {
+    background-color: var(--primary-color);
+  }
+  
+  /* Dark Mode Support */
+  @media (prefers-color-scheme: dark) {
+    .ranking {
+      background-color: var(--dark-card-alt);
+    }
+    
+    .team-info-card {
+      background-color: var(--dark-card-alt);
+    }
+  }
+</style>
+{% endblock %}

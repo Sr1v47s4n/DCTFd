@@ -1,0 +1,618 @@
+{% extends "users/base.html" %}
+{% load static %}
+{% load challenge_extras %}
+
+{% block title %}Challenges - {{ event_name|default:"DCTFd" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Challenge page styling */
+    .challenge-container {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .category-section {
+        margin-bottom: 2.5rem;
+        position: relative;
+    }
+    
+    .category-header {
+        background: linear-gradient(135deg, #2a2a72 0%, #009ffd 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .category-header:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('/static/images/pattern.png');
+        opacity: 0.05;
+        z-index: 0;
+    }
+    
+    .category-header > * {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .category-header:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .category-header.collapsed {
+        opacity: 0.85;
+    }
+    
+    .challenge-card {
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+    
+    .challenge-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .challenge-card .card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+        border: none;
+        position: relative;
+    }
+    
+    .challenge-card .card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .challenge-card .card-header {
+        background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        border-bottom: none;
+        padding: 1rem 1.25rem;
+    }
+    
+    .challenge-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .challenge-card .card-footer {
+        background-color: rgba(0, 0, 0, 0.02);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+    }
+    
+    .challenge-card.solved .card {
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
+    }
+    
+        .challenge-card.solved .card::before {
+        content: '\f00c'; /* check mark */
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 1.5rem;
+        color: rgba(40, 167, 69, 0.3);
+        z-index: 1;
+    }
+    
+    .challenge-card.locked .card {
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.2);
+        opacity: 0.7;
+    }
+    
+    .challenge-card.locked .card::before {
+        content: '\f023'; /* lock icon */
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 1.5rem;
+        color: rgba(108, 117, 125, 0.3);
+        z-index: 1;
+    }
+    
+    .challenge-card.locked .card-header {
+        background: linear-gradient(to right, #f8f9fa, #e2e3e5);
+        color: #6c757d;
+    }
+    
+    .challenge-card.solved .card-header {
+        background: linear-gradient(to right, #d4edda, #c3e6cb);
+    }
+    
+    .challenge-difficulty {
+        display: flex;
+        align-items: center;
+        margin-top: 0.75rem;
+    }
+    
+    .difficulty-dot {
+        height: 8px;
+        width: 8px;
+        margin-right: 3px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        transition: all 0.2s ease;
+    }
+    
+    .difficulty-active {
+        background-color: #fd7e14;
+    }
+    
+    .challenge-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .category-count {
+        background-color: rgba(255, 255, 255, 0.3);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .challenge-filters {
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .filter-btn {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-radius: 20px;
+        padding: 0.4rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .filter-btn.active {
+        background-color: #007bff;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.25);
+    }
+    
+    .stats-container {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        flex: 1;
+        background-color: white;
+        padding: 1.25rem;
+        border-radius: 12px;
+        text-align: center;
+        margin: 0 0.5rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(to right, #007bff, #00c6ff);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 0.25rem;
+        text-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 500;
+    }
+    
+    .badge.rounded-pill {
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(to right, #007bff, #0056b3);
+        border: none;
+        box-shadow: 0 3px 6px rgba(0, 123, 255, 0.2);
+        transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(to right, #0056b3, #003d80);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(0, 123, 255, 0.3);
+    }
+    
+    .card-title {
+        font-weight: 600;
+        color: #343a40;
+    }
+    
+    .card-text {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-container {
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1 0 45%;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-flag me-2"></i>Challenges</h1>
+        <div>
+            <span class="badge bg-primary rounded-pill p-2">Event: {{ event.name }}</span>
+        </div>
+    </div>
+    
+    {% if not event %}
+        <div class="alert alert-warning">
+            No active CTF event is currently running.
+        </div>
+    {% else %}
+        {% if event.end_time and event.end_time < now %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> This CTF event has ended.
+            </div>
+        {% endif %}
+        
+        <!-- Stats Section -->
+        <div class="stats-container mb-4">
+            <div class="stat-card">
+                <div class="stat-value">{{ total_challenges|default:"0" }}</div>
+                <div class="stat-label">Total Challenges</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ solved_challenges|length|default:"0" }}</div>
+                <div class="stat-label">Challenges Solved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ total_points|default:"0" }}</div>
+                <div class="stat-label">Total Points</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ earned_points|default:"0" }}</div>
+                <div class="stat-label">Points Earned</div>
+            </div>
+        </div>
+        
+        <!-- Challenge Filters -->
+        <div class="challenge-filters">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Filter Challenges</h5>
+                <button id="reset-filters" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-redo-alt me-1"></i> Reset Filters
+                </button>
+            </div>
+            
+            <div>
+                                <button class="btn btn-outline-primary filter-btn active" data-filter="all">
+                    <i class="fas fa-th-large me-1"></i> All
+                </button>
+                <button class="btn btn-outline-success filter-btn" data-filter="solved">
+                    <i class="fas fa-check-circle me-1"></i> Solved
+                </button>
+                <button class="btn btn-outline-danger filter-btn" data-filter="unsolved">
+                    <i class="fas fa-times-circle me-1"></i> Unsolved
+                </button>
+                <button class="btn btn-outline-secondary filter-btn" data-filter="locked">
+                    <i class="fas fa-lock me-1"></i> Locked
+                </button>
+                
+                <div class="mt-3">
+                    {% for category in categories %}
+                        <button class="btn btn-outline-secondary filter-btn" data-filter-category="{{ category.id }}">
+                            {% if category.icon %}
+                                <i class="fas {{ category.icon }} me-1"></i>
+                            {% endif %}
+                            {{ category.name }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Challenge Categories -->
+        {% if challenges %}
+            <div id="challenges-container">
+                {% regroup challenges by category as challenge_categories %}
+                
+                {% for category in challenge_categories %}
+                    <div class="category-section" id="category-{{ category.grouper.id }}">
+                        <div class="category-header" data-bs-toggle="collapse" 
+                             data-bs-target="#collapse-{{ category.grouper.id }}" aria-expanded="true">
+                            <div>
+                                {% if category.grouper.icon %}
+                                    <i class="fas {{ category.grouper.icon }} me-2"></i>
+                                {% endif %}
+                                <span class="h4 mb-0">{{ category.grouper.name }}</span>
+                            </div>
+                            <div class="category-count">
+                                {{ category.list|length }} challenge{% if category.list|length != 1 %}s{% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="collapse show" id="collapse-{{ category.grouper.id }}">
+                            <div class="row">
+                                {% for challenge in category.list %}
+                                    <div class="col-md-6 col-lg-4 challenge-card {% if challenge.id in solved_challenges %}solved{% endif %} {% if not prerequisite_status|get_item:challenge.id %}locked{% endif %}" 
+                                         data-category="{{ challenge.category.id }}" 
+                                         data-status="{% if challenge.id in solved_challenges %}solved{% elif not prerequisite_status|get_item:challenge.id %}locked{% else %}unsolved{% endif %}">
+                                        <div class="card h-100">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <h5 class="card-title mb-0">{{ challenge.name }}</h5>
+                                                <span class="badge bg-primary rounded-pill">{{ challenge.value }} pts</span>
+                                            </div>
+                                            <div class="card-body">
+                                                <p class="card-text">
+                                                    {% if not prerequisite_status|get_item:challenge.id %}
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-lock me-2"></i> This challenge is locked. 
+                                                            Complete the prerequisite challenges to unlock it.
+                                                        </div>
+                                                    {% else %}
+                                                        {{ challenge.description|truncatechars:100 }}
+                                                    {% endif %}
+                                                </p>
+                                                
+                                                <div class="challenge-difficulty">
+                                                    {% with ''|center:5 as range %}
+                                                        {% for _ in range %}
+                                                            <div class="difficulty-dot {% if forloop.counter <= challenge.difficulty %}difficulty-active{% endif %}"></div>
+                                                        {% endfor %}
+                                                    {% endwith %}
+                                                    <small class="ms-2 text-muted">
+                                                        {% if challenge.difficulty == 1 %}
+                                                            Easy
+                                                        {% elif challenge.difficulty == 2 %}
+                                                            Easy-Medium
+                                                        {% elif challenge.difficulty == 3 %}
+                                                            Medium
+                                                        {% elif challenge.difficulty == 4 %}
+                                                            Medium-Hard
+                                                        {% else %}
+                                                            Hard
+                                                        {% endif %}
+                                                    </small>
+                                                </div>
+                                                
+                                                <div class="challenge-meta">
+                                                    <div>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-users me-1"></i> {{ challenge.solves|default:"0" }} solves
+                                                        </small>
+                                                    </div>
+                                                    {% if challenge.id in solved_challenges %}
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check-circle me-1"></i> Solved
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="card-footer text-center">
+                                                {% if not prerequisite_status|get_item:challenge.id %}
+                                                    <button class="btn btn-secondary btn-sm w-100" disabled>
+                                                        <i class="fas fa-lock me-1"></i> Locked
+                                                    </button>
+                                                {% else %}
+                                                    <a href="{% url 'challenges:detail' challenge.id %}" class="btn btn-primary btn-sm w-100">
+                                                        <i class="fas fa-puzzle-piece me-1"></i> View Challenge
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> No challenges available yet.
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Variables
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const challengeCards = document.querySelectorAll('.challenge-card');
+        const resetFiltersBtn = document.getElementById('reset-filters');
+        const categoryHeaders = document.querySelectorAll('.category-header');
+        
+        // Filter state
+        let activeFilters = {
+            status: 'all',
+            category: null
+        };
+        
+        // Apply filters
+        function applyFilters() {
+            challengeCards.forEach(card => {
+                let visible = true;
+                
+                // Filter by status
+                if (activeFilters.status !== 'all') {
+                    const cardStatus = card.getAttribute('data-status');
+                    if (cardStatus !== activeFilters.status) {
+                        visible = false;
+                    }
+                }
+                
+                // Filter by category
+                if (activeFilters.category && visible) {
+                    const cardCategory = card.getAttribute('data-category');
+                    if (cardCategory !== activeFilters.category) {
+                        visible = false;
+                    }
+                }
+                
+                // Apply visibility
+                card.style.display = visible ? 'block' : 'none';
+            });
+            
+            // Update category sections visibility
+            updateCategorySections();
+        }
+        
+        // Update category sections based on visible challenges
+        function updateCategorySections() {
+            const categorySections = document.querySelectorAll('.category-section');
+            
+            categorySections.forEach(section => {
+                const categoryId = section.id.replace('category-', '');
+                const hasVisibleChallenges = Array.from(section.querySelectorAll('.challenge-card'))
+                    .some(card => card.style.display !== 'none');
+                
+                section.style.display = hasVisibleChallenges ? 'block' : 'none';
+            });
+        }
+        
+        // Filter buttons event listeners
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Status filters
+                if (this.hasAttribute('data-filter')) {
+                    // Update active status button
+                    filterButtons.forEach(btn => {
+                        if (btn.hasAttribute('data-filter')) {
+                            btn.classList.remove('active');
+                        }
+                    });
+                    this.classList.add('active');
+                    
+                    // Update filter state
+                    activeFilters.status = this.getAttribute('data-filter');
+                }
+                
+                // Category filters
+                if (this.hasAttribute('data-filter-category')) {
+                    // Toggle category filter
+                    const categoryId = this.getAttribute('data-filter-category');
+                    
+                    if (activeFilters.category === categoryId) {
+                        // If clicking the active category, deactivate it
+                        activeFilters.category = null;
+                        this.classList.remove('active');
+                    } else {
+                        // Deactivate other category buttons
+                        filterButtons.forEach(btn => {
+                            if (btn.hasAttribute('data-filter-category')) {
+                                btn.classList.remove('active');
+                            }
+                        });
+                        
+                        // Activate this category
+                        this.classList.add('active');
+                        activeFilters.category = categoryId;
+                    }
+                }
+                
+                // Apply the filters
+                applyFilters();
+            });
+        });
+        
+        // Reset filters
+        resetFiltersBtn.addEventListener('click', function() {
+            // Reset filter state
+            activeFilters = {
+                status: 'all',
+                category: null
+            };
+            
+            // Reset filter buttons
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-filter') === 'all') {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Show all challenges
+            challengeCards.forEach(card => {
+                card.style.display = 'block';
+            });
+            
+            // Show all categories
+            document.querySelectorAll('.category-section').forEach(section => {
+                section.style.display = 'block';
+            });
+        });
+        
+        // Category toggle
+        categoryHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                this.classList.toggle('collapsed');
+            });
+        });
+        
+        // Initialize with 'All' selected
+        document.querySelector('[data-filter="all"]').classList.add('active');
+    });
+</script>
+{% endblock %}

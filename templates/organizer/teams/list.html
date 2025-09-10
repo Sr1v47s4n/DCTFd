@@ -1,0 +1,100 @@
+{% extends 'organizer/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block dashboard_title %}{% trans "Teams" %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0"><i class="fas fa-users me-2"></i>{% trans "Teams Management" %}</h5>
+          <div>
+            <a href="#" class="btn btn-primary btn-sm">
+              <i class="fas fa-download me-1"></i> {% trans "Export" %}
+            </a>
+          </div>
+        </div>
+        <div class="card-body">
+          {% if teams %}
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Members" %}</th>
+                    <th>{% trans "Score" %}</th>
+                    <th>{% trans "Solved" %}</th>
+                    <th>{% trans "Country" %}</th>
+                    <th>{% trans "Last Activity" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for team in teams %}
+                    <tr>
+                      <td>
+                        <a href="{% url 'organizer:team_detail' team.id %}">{{ team.name }}</a>
+                      </td>
+                      <td>{{ team.members.count }} / {{ team.max_members }}</td>
+                      <td>{{ team.score }}</td>
+                      <td>{{ team.solved_count }}</td>
+                      <td>
+                        {% if team.country %}
+                          <span class="fi fi-{{ team.country|lower }}"></span> {{ team.get_country_display }}
+                        {% else %}
+                          —
+                        {% endif %}
+                      </td>
+                      <td>{{ team.last_active|default:"Never" }}</td>
+                      <td>
+                        <div class="btn-group">
+                          <a href="{% url 'organizer:team_detail' team.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                          <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteTeamModal{{ team.id }}">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                        
+                        <!-- Delete Modal -->
+                        <div class="modal fade" id="deleteTeamModal{{ team.id }}" tabindex="-1" aria-labelledby="deleteTeamModalLabel{{ team.id }}" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="deleteTeamModalLabel{{ team.id }}">{% trans "Delete Team" %}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                {% trans "Are you sure you want to delete the team" %} <strong>{{ team.name }}</strong>?
+                                <p class="text-danger mt-2">{% trans "This action cannot be undone." %}</p>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                                <form method="post" action="#">
+                                  {% csrf_token %}
+                                  <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>{% trans "No teams have registered yet." %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

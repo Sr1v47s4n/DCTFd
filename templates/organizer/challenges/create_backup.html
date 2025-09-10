@@ -1,0 +1,1209 @@
+{% extends "organizer/base.html" %}
+
+{% block dashboard_title %}{% if challenge %}Edit Challenge{% else %}Create Challenge{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-section {
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .form-section-title {
+    color: #4e31aa;
+    font-weight: 600;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 8px;
+  }
+  
+  .form-label {
+    color: #2c2c2c !important;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  
+  .form-control, .form-select {
+    background-color: #ffffff !important;
+    border: 1px solid #ced4da !important;
+    color: #495057 !important;
+    border-radius: 4px;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background-color: #ffffff !important;
+    border-color: #4e31aa !important;
+    color: #495057 !important;
+    box-shadow: 0 0 0 0.25rem rgba(78, 49, 170, 0.25) !important;
+  }
+  
+  .form-text {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+  }
+  
+  .required::after {
+    content: " *";
+    color: #e74c3c;
+  }
+  
+  .btn-primary {
+    background-color: #4e31aa !important;
+    border-color: #4e31aa !important;
+    color: #ffffff !important;
+  }
+  
+  .btn-primary:hover {
+    background-color: #3a2683 !important;
+    border-color: #3a2683 !important;
+    color: #ffffff !important;
+  }
+  
+  .invalid-feedback {
+    display: block !important;
+    color: #e74c3c !important;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+  
+  .alert {
+    border-radius: 8px;
+    border: none;
+    padding: 15px;
+  }
+  
+  .alert-danger {
+    background-color: rgba(231, 76, 60, 0.1) !important;
+    border-left: 4px solid #e74c3c !important;
+    color: #c0392b !important;
+  }
+  
+  .alert-success {
+    background-color: rgba(46, 204, 113, 0.1) !important;
+    border-left: 4px solid #2ecc71 !important;
+    color: #27ae60 !important;
+  }
+  
+  .card {
+    background-color: #ffffff !important;
+    color: #2c2c2c !important;
+  }
+  
+  .card-header {
+    background-color: #f8f9fa !important;
+    color: #2c2c2c !important;
+  }
+  
+  .card-title {
+    color: #4e31aa !important;
+  }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h3 class="card-title mb-0">
+            <i class="fas {% if challenge %}fa-edit{% else %}fa-plus{% endif %} me-2"></i>
+            {% if challenge %}Edit Challenge: {{ challenge.name }}{% else %}Create New Challenge{% endif %}
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Non-field errors -->
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+          {{ error }}
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <div class="row">
+      <div class="col-lg-8">
+        <!-- Basic Information -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <i class="fas fa-info-circle me-2"></i>
+            Basic Information
+          </h4>
+          
+          <div class="row">
+            <div class="col-md-8">
+              <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label required">Challenge Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="{{ form.value.id_for_label }}" class="form-label required">Points</label>
+                {{ form.value }}
+                {% if form.value.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.value.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.description.id_for_label }}" class="form-label required">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.description.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">You can use Markdown formatting. HTML is also supported.</div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.category.id_for_label }}" class="form-label required">Category</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.category.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.event.id_for_label }}" class="form-label required">Event</label>
+                {{ form.event }}
+                {% if form.event.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.event.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scoring Configuration -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <i class="fas fa-trophy me-2"></i>
+            Scoring Configuration
+          </h4>
+          
+          <div class="row">
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="{{ form.initial_value.id_for_label }}" class="form-label">Initial Value</label>
+                {{ form.initial_value }}
+                {% if form.initial_value.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.initial_value.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">For dynamic scoring</div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="{{ form.min_value.id_for_label }}" class="form-label">Minimum Value</label>
+                {{ form.min_value }}
+                {% if form.min_value.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.min_value.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Minimum points possible</div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="{{ form.decay.id_for_label }}" class="form-label">Decay Factor</label>
+                {{ form.decay }}
+                {% if form.decay.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.decay.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Score reduction rate (0.01-1.0)</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.decay_threshold.id_for_label }}" class="form-label">Decay Threshold</label>
+                {{ form.decay_threshold }}
+                {% if form.decay_threshold.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.decay_threshold.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">Solves before decay starts</div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.max_attempts.id_for_label }}" class="form-label">Max Attempts</label>
+                {{ form.max_attempts }}
+                {% if form.max_attempts.errors %}
+                  <div class="invalid-feedback">
+                    {% for error in form.max_attempts.errors %}{{ error }}{% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">0 = unlimited attempts</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <!-- Settings -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <i class="fas fa-cog me-2"></i>
+            Challenge Settings
+          </h4>
+          
+          <div class="mb-3">
+            <label for="{{ form.difficulty.id_for_label }}" class="form-label">Difficulty</label>
+            {{ form.difficulty }}
+            {% if form.difficulty.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.difficulty.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">1 = Easy, 5 = Hard</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.type.id_for_label }}" class="form-label">Type</label>
+            {{ form.type }}
+            {% if form.type.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.type.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.state.id_for_label }}" class="form-label">State</label>
+            {{ form.state }}
+            {% if form.state.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.state.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="mb-3">
+            <label for="{{ form.flag_logic.id_for_label }}" class="form-label">Flag Logic</label>
+            {{ form.flag_logic }}
+            {% if form.flag_logic.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.flag_logic.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+            <div class="form-text">How multiple flags are validated</div>
+          </div>
+          
+          <div class="form-check">
+            {{ form.is_visible }}
+            <label class="form-check-label" for="{{ form.is_visible.id_for_label }}">
+              Visible to participants
+            </label>
+            {% if form.is_visible.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.is_visible.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="form-section">
+          <h4 class="form-section-title">
+            <i class="fas fa-bolt me-2"></i>
+            Quick Actions
+          </h4>
+          
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>
+              {% if challenge %}Update Challenge{% else %}Create Challenge{% endif %}
+            </button>
+            
+            {% if challenge %}
+              <a href="{% url 'organizer:challenge_detail' challenge.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-eye me-2"></i>
+                View Challenge
+              </a>
+            {% endif %}
+            
+            <a href="{% url 'organizer:challenges' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-arrow-left me-2"></i>
+              Back to Challenges
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Auto-fill initial_value when value changes
+  document.getElementById('{{ form.value.id_for_label }}').addEventListener('input', function() {
+    const initialValueField = document.getElementById('{{ form.initial_value.id_for_label }}');
+    if (!initialValueField.value) {
+      initialValueField.value = this.value;
+    }
+  });
+  
+  // Auto-fill min_value as half of value
+  document.getElementById('{{ form.value.id_for_label }}').addEventListener('input', function() {
+    const minValueField = document.getElementById('{{ form.min_value.id_for_label }}');
+    if (!minValueField.value) {
+      minValueField.value = Math.floor(this.value / 2);
+    }
+  });
+</script>
+{% endblock %}
+            
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="{{ form.connection_info.id_for_label }}" class="form-label">Connection Info</label>
+                {{ form.connection_info }}
+                {% if form.connection_info.errors %}
+                  <div class="invalid-feedback d-block">
+                    {% for error in form.connection_info.errors %}
+                      {{ error }}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                <div class="form-text">
+                  E.g., server details, ports, credentials. Will be displayed to participants.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="settings-card">
+            <h4>Challenge Settings</h4>
+            
+            <div class="mb-3 form-check">
+              {{ form.is_visible }}
+              <label class="form-check-label" for="{{ form.is_visible.id_for_label }}">
+                Visible to participants
+              </label>
+              {% if form.is_visible.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.is_visible.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-3 form-check">
+              {{ form.requires_unlock }}
+              <label class="form-check-label" for="{{ form.requires_unlock.id_for_label }}">
+                Requires unlocking
+              </label>
+              {% if form.requires_unlock.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.requires_unlock.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.unlock_requirements.id_for_label }}" class="form-label">Unlock Requirements</label>
+              {{ form.unlock_requirements }}
+              {% if form.unlock_requirements.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.unlock_requirements.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">
+                Select challenges that must be solved before this one is unlocked.
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.release_time.id_for_label }}" class="form-label">Release Time</label>
+              {{ form.release_time }}
+              {% if form.release_time.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.release_time.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">
+                Challenge will be hidden until this time. Leave blank to release immediately.
+              </div>
+            </div>
+            
+            <div class="mb-3 form-check">
+              {{ form.dynamic_scoring }}
+              <label class="form-check-label" for="{{ form.dynamic_scoring.id_for_label }}">
+                Use dynamic scoring
+              </label>
+              {% if form.dynamic_scoring.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.dynamic_scoring.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">
+                Points will decrease with each solve.
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="{{ form.min_points.id_for_label }}" class="form-label">Minimum Points</label>
+              {{ form.min_points }}
+              {% if form.min_points.errors %}
+                <div class="invalid-feedback d-block">
+                  {% for error in form.min_points.errors %}
+                    {{ error }}
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="form-text">
+                Minimum points after decay (only for dynamic scoring).
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {% if challenge %}
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="dashboard-card inner-card">
+              <div class="card-header">
+                <h4><i class="fas fa-file me-2"></i> Challenge Files</h4>
+              </div>
+              <div class="card-body">
+                {% if challenge.files.exists %}
+                  <div class="files-list">
+                    {% for file in challenge.files.all %}
+                      <div class="file-item">
+                        <div class="file-info">
+                          <i class="fas fa-file me-2"></i>
+                          <span class="file-name">{{ file.name }}</span>
+                          <span class="file-size">{{ file.size|filesizeformat }}</span>
+                        </div>
+                        <div class="file-actions">
+                          <a href="{{ file.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                            <i class="fas fa-download"></i>
+                          </a>
+                          <button type="button" class="btn btn-sm btn-outline-danger delete-file" data-id="{{ file.id }}" data-name="{{ file.name }}">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p>No files attached to this challenge yet.</p>
+                {% endif %}
+                
+                <div class="file-upload mt-3">
+                  <label for="challenge-files" class="form-label">Add Files</label>
+                  <input type="file" class="form-control" id="challenge-files" name="files" multiple>
+                  <div class="form-text">
+                    You can upload multiple files. Max size per file: 25MB.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="dashboard-card inner-card">
+              <div class="card-header">
+                <h4><i class="fas fa-flag me-2"></i> Challenge Flags</h4>
+              </div>
+              <div class="card-body">
+                <div id="flags-container">
+                  {% if challenge.flags.exists %}
+                    {% for flag in challenge.flags.all %}
+                      <div class="flag-item">
+                        <div class="flag-content">
+                          <code>{{ flag.content }}</code>
+                        </div>
+                        <div class="flag-type">
+                          {% if flag.type == 'static' %}
+                            <span class="badge bg-primary">Static</span>
+                          {% elif flag.type == 'regex' %}
+                            <span class="badge bg-info">Regex</span>
+                          {% else %}
+                            <span class="badge bg-secondary">{{ flag.type }}</span>
+                          {% endif %}
+                        </div>
+                        <div class="flag-actions">
+                          <button type="button" class="btn btn-sm btn-outline-danger delete-flag" data-id="{{ flag.id }}">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="alert alert-warning">
+                      <i class="fas fa-exclamation-triangle me-2"></i>
+                      No flags defined. Teams won't be able to submit answers without at least one flag.
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <div class="flag-form mt-4">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="mb-3">
+                        <label for="flag-content" class="form-label">Flag Content</label>
+                        <input type="text" class="form-control" id="flag-content" name="flag_content">
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="mb-3">
+                        <label for="flag-type" class="form-label">Flag Type</label>
+                        <select class="form-select" id="flag-type" name="flag_type">
+                          <option value="static">Static</option>
+                          <option value="regex">Regex</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="mb-3">
+                        <label class="form-label d-block">&nbsp;</label>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="flag-case-sensitive" name="flag_case_sensitive" checked>
+                          <label class="form-check-label" for="flag-case-sensitive">
+                            Case Sensitive
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" id="add-flag-btn" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> Add Flag
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mt-4">
+          <div class="col-12">
+            <div class="dashboard-card inner-card">
+              <div class="card-header">
+                <h4><i class="fas fa-lightbulb me-2"></i> Hints</h4>
+              </div>
+              <div class="card-body">
+                <div id="hints-container">
+                  {% if challenge.hints.exists %}
+                    {% for hint in challenge.hints.all %}
+                      <div class="hint-item">
+                        <div class="hint-content">{{ hint.content }}</div>
+                        <div class="hint-cost">{{ hint.cost }} points</div>
+                        <div class="hint-actions">
+                          <button type="button" class="btn btn-sm btn-outline-danger delete-hint" data-id="{{ hint.id }}">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <p>No hints added yet.</p>
+                  {% endif %}
+                </div>
+                
+                <div class="hint-form mt-4">
+                  <div class="row">
+                    <div class="col-md-9">
+                      <div class="mb-3">
+                        <label for="hint-content" class="form-label">Hint Content</label>
+                        <textarea class="form-control" id="hint-content" name="hint_content" rows="3"></textarea>
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="mb-3">
+                        <label for="hint-cost" class="form-label">Cost (points)</label>
+                        <input type="number" class="form-control" id="hint-cost" name="hint_cost" value="10" min="0">
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" id="add-hint-btn" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> Add Hint
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+      
+      <div class="form-actions mt-4">
+        <button type="submit" class="btn btn-primary btn-lg">
+          <i class="fas {% if challenge %}fa-save{% else %}fa-plus{% endif %} me-2"></i>
+          {% if challenge %}Save Changes{% else %}Create Challenge{% endif %}
+        </button>
+        <a href="{% url 'organizer:challenges' %}" class="btn btn-outline-secondary btn-lg ms-2">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="add-category-form" method="post" action="{% url 'organizer:category_create' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="categoryName" class="form-label">Category Name</label>
+            <input type="text" class="form-control" id="categoryName" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="categoryColor" class="form-label">Color</label>
+            <input type="color" class="form-control form-control-color" id="categoryColor" name="color" value="#3498db">
+          </div>
+          <div class="mb-3">
+            <label for="categoryDescription" class="form-label">Description (Optional)</label>
+            <textarea class="form-control" id="categoryDescription" name="description" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Define fallback colors for better visibility */
+  :root {
+    --primary-color: #007bff;
+    --dark-card: #2d3436;
+    --dark-card-alt: #636e72;
+    --dark-border: #74b9ff;
+    --text-light: #ffffff;
+    --text-muted: #b2bec3;
+    --accent-color: #00cec9;
+    --border-radius: 8px;
+  }
+
+  .settings-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    height: 100%;
+  }
+  
+  .settings-card h4 {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+    color: #007bff;
+  }
+  
+  .inner-card {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    margin-bottom: 20px;
+  }
+  
+  .inner-card .card-header {
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .inner-card .card-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #495057;
+  }
+  
+  .files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+  
+  .file-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .file-name {
+    font-weight: 600;
+    margin-right: 10px;
+    color: #495057;
+  }
+  
+  .file-size {
+    color: #6c757d;
+    font-size: 0.85rem;
+  }
+  
+  .file-actions {
+    display: flex;
+    gap: 5px;
+  }
+  
+  #flags-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .flag-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+  
+  .flag-content {
+    flex-grow: 1;
+  }
+  
+  .flag-content code {
+    font-family: monospace;
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 5px 8px;
+    border-radius: 4px;
+  }
+  
+  .flag-type {
+    margin: 0 15px;
+  }
+  
+  #hints-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .hint-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+  }
+  
+  .hint-content {
+    flex-grow: 1;
+    color: #495057;
+  }
+  
+  .hint-cost {
+    margin: 0 15px;
+    font-weight: 600;
+    color: #007bff;
+  }
+  
+  .form-actions {
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+  }
+  
+  /* Styling form elements for better visibility */
+  .form-control, .form-select {
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    color: #495057;
+    border-radius: 4px;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    background-color: #ffffff;
+    border-color: #80bdff;
+    color: #495057;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  textarea.form-control {
+    min-height: 100px;
+  }
+  
+  .form-check-input {
+    background-color: var(--dark-card);
+    border: 1px solid var(--dark-border);
+  }
+  
+  .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+  
+  .form-text {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 5px;
+  }
+  
+  /* Modal styling */
+  .modal-content {
+    background-color: var(--dark-card);
+    color: var(--text-light);
+    border: 1px solid var(--dark-border);
+  }
+  
+  .modal-header {
+    border-bottom-color: var(--dark-border);
+  }
+  
+  .modal-footer {
+    border-top-color: var(--dark-border);
+  }
+  
+  .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    {% if challenge %}
+      // Add flag functionality
+      const addFlagBtn = document.getElementById('add-flag-btn');
+      const flagContent = document.getElementById('flag-content');
+      const flagType = document.getElementById('flag-type');
+      const flagCaseSensitive = document.getElementById('flag-case-sensitive');
+      const flagsContainer = document.getElementById('flags-container');
+      
+      addFlagBtn.addEventListener('click', function() {
+        if (flagContent.value.trim() === '') {
+          alert('Flag content cannot be empty');
+          return;
+        }
+        
+        // Submit the flag via AJAX
+        const formData = new FormData();
+        formData.append('content', flagContent.value);
+        formData.append('type', flagType.value);
+        formData.append('case_sensitive', flagCaseSensitive.checked);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch('{% url "organizer:flag_add" challenge.id %}', {
+          method: 'POST',
+          body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Add the flag to the UI
+            const flagItem = document.createElement('div');
+            flagItem.classList.add('flag-item');
+            
+            const badgeClass = flagType.value === 'static' ? 'bg-primary' : 'bg-info';
+            
+            flagItem.innerHTML = `
+              <div class="flag-content">
+                <code>${flagContent.value}</code>
+              </div>
+              <div class="flag-type">
+                <span class="badge ${badgeClass}">${flagType.value}</span>
+              </div>
+              <div class="flag-actions">
+                <button type="button" class="btn btn-sm btn-outline-danger delete-flag" data-id="${data.id}">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            `;
+            
+            flagsContainer.appendChild(flagItem);
+            
+            // Clear the form
+            flagContent.value = '';
+            
+            // Add event listener to the new delete button
+            const newDeleteBtn = flagItem.querySelector('.delete-flag');
+            addDeleteFlagListener(newDeleteBtn);
+          } else {
+            alert(`Error: ${data.message}`);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while adding the flag');
+        });
+      });
+      
+      // Delete flag functionality
+      const deleteFlags = document.querySelectorAll('.delete-flag');
+      
+      function addDeleteFlagListener(button) {
+        button.addEventListener('click', function() {
+          const flagId = this.dataset.id;
+          
+          if (confirm('Are you sure you want to delete this flag?')) {
+            // Delete the flag via AJAX
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            fetch(`/organizer/challenges/{{ challenge.id }}/flags/${flagId}/delete/`, {
+              method: 'POST',
+              body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Remove the flag from the UI
+                this.closest('.flag-item').remove();
+              } else {
+                alert(`Error: ${data.message}`);
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while deleting the flag');
+            });
+          }
+        });
+      }
+      
+      deleteFlags.forEach(addDeleteFlagListener);
+      
+      // Add hint functionality
+      const addHintBtn = document.getElementById('add-hint-btn');
+      const hintContent = document.getElementById('hint-content');
+      const hintCost = document.getElementById('hint-cost');
+      const hintsContainer = document.getElementById('hints-container');
+      
+      addHintBtn.addEventListener('click', function() {
+        if (hintContent.value.trim() === '') {
+          alert('Hint content cannot be empty');
+          return;
+        }
+        
+        // Submit the hint via AJAX
+        const formData = new FormData();
+        formData.append('content', hintContent.value);
+        formData.append('cost', hintCost.value);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        fetch('{% url "organizer:hint_add" challenge.id %}', {
+          method: 'POST',
+          body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Add the hint to the UI
+            const hintItem = document.createElement('div');
+            hintItem.classList.add('hint-item');
+            
+            hintItem.innerHTML = `
+              <div class="hint-content">${hintContent.value}</div>
+              <div class="hint-cost">${hintCost.value} points</div>
+              <div class="hint-actions">
+                <button type="button" class="btn btn-sm btn-outline-danger delete-hint" data-id="${data.id}">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            `;
+            
+            hintsContainer.appendChild(hintItem);
+            
+            // Clear the form
+            hintContent.value = '';
+            hintCost.value = '10';
+            
+            // Add event listener to the new delete button
+            const newDeleteBtn = hintItem.querySelector('.delete-hint');
+            addDeleteHintListener(newDeleteBtn);
+          } else {
+            alert(`Error: ${data.message}`);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while adding the hint');
+        });
+      });
+      
+      // Delete hint functionality
+      const deleteHints = document.querySelectorAll('.delete-hint');
+      
+      function addDeleteHintListener(button) {
+        button.addEventListener('click', function() {
+          const hintId = this.dataset.id;
+          
+          if (confirm('Are you sure you want to delete this hint?')) {
+            // Delete the hint via AJAX
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            fetch(`/organizer/challenges/{{ challenge.id }}/hints/${hintId}/delete/`, {
+              method: 'POST',
+              body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Remove the hint from the UI
+                this.closest('.hint-item').remove();
+              } else {
+                alert(`Error: ${data.message}`);
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while deleting the hint');
+            });
+          }
+        });
+      }
+      
+      deleteHints.forEach(addDeleteHintListener);
+      
+      // Delete file functionality
+      const deleteFiles = document.querySelectorAll('.delete-file');
+      
+      deleteFiles.forEach(button => {
+        button.addEventListener('click', function() {
+          const fileId = this.dataset.id;
+          const fileName = this.dataset.name;
+          
+          if (confirm(`Are you sure you want to delete the file "${fileName}"?`)) {
+            // Delete the file via AJAX
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            fetch(`/organizer/challenges/{{ challenge.id }}/files/${fileId}/delete/`, {
+              method: 'POST',
+              body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Remove the file from the UI
+                this.closest('.file-item').remove();
+              } else {
+                alert(`Error: ${data.message}`);
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while deleting the file');
+            });
+          }
+        });
+      });
+    {% endif %}
+    
+    // Add category functionality
+    const addCategoryForm = document.getElementById('add-category-form');
+    
+    addCategoryForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const formData = new FormData(this);
+      
+      fetch(this.action, {
+        method: 'POST',
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Add the new category to the dropdown
+          const categorySelect = document.getElementById('{{ form.category.id_for_label }}');
+          const option = document.createElement('option');
+          option.value = data.id;
+          option.textContent = data.name;
+          categorySelect.appendChild(option);
+          option.selected = true;
+          
+          // Close the modal
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoryModal'));
+          modal.hide();
+          
+          // Clear the form
+          document.getElementById('categoryName').value = '';
+          document.getElementById('categoryDescription').value = '';
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while adding the category');
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "organizer/base.html" %}
+
+{% block dashboard_title %}Events Management{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3>All Events</h3>
+    <a href="{% url 'organizer:create_event' %}" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Create Event
+    </a>
+  </div>
+  <div class="card-body">
+    {% if events %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Status</th>
+            <th>Visibility</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+            <tr>
+              <td>{{ event.name }}</td>
+              <td>{{ event.start_time|date:"M d, Y H:i" }}</td>
+              <td>{% if event.end_time %}{{ event.end_time|date:"M d, Y H:i" }}{% else %}Ongoing{% endif %}</td>
+              <td>
+                {% if event.is_active %}
+                  <span class="badge bg-success">Active</span>
+                {% elif event.end_time and event.end_time < now %}
+                  <span class="badge bg-danger">Ended</span>
+                {% else %}
+                  <span class="badge bg-warning">Upcoming</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if event.is_visible %}
+                  <span class="badge bg-success">Visible</span>
+                {% else %}
+                  <span class="badge bg-secondary">Hidden</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="btn-group">
+                  <a href="{% url 'organizer:edit_event' event.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i> Edit
+                  </a>
+                  <button type="button" class="btn btn-sm btn-outline-danger confirm-action" data-bs-toggle="modal" data-bs-target="#deleteEventModal{{ event.id }}">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+                
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteEventModal{{ event.id }}" tabindex="-1" aria-labelledby="deleteEventModalLabel{{ event.id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="deleteEventModalLabel{{ event.id }}">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <p>Are you sure you want to delete the event "{{ event.name }}"?</p>
+                        <p class="text-danger">This action cannot be undone and will remove all associated data.</p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form method="post" action="#">
+                          {% csrf_token %}
+                          <input type="hidden" name="event_id" value="{{ event.id }}">
+                          <button type="submit" class="btn btn-danger">Delete Event</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="text-center p-5">
+        <p class="text-muted">No events found.</p>
+        <a href="{% url 'organizer:create_event' %}" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Create Your First Event
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

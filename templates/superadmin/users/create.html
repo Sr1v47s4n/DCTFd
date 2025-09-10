@@ -1,0 +1,107 @@
+{% extends "superadmin/base.html" %}
+
+{% block dashboard_title %}Create User{% endblock %}
+
+{% block dashboard_content %}
+<div class="dashboard-card">
+  <div class="card-header">
+    <h3>Create New User</h3>
+  </div>
+  <div class="card-body">
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" required>
+          <div class="invalid-feedback">
+            Please provide a username.
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+          <div class="invalid-feedback">
+            Please provide a valid email.
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="first_name" class="form-label">First Name</label>
+          <input type="text" class="form-control" id="first_name" name="first_name" required>
+          <div class="invalid-feedback">
+            Please provide a first name.
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label for="last_name" class="form-label">Last Name</label>
+          <input type="text" class="form-control" id="last_name" name="last_name" required>
+          <div class="invalid-feedback">
+            Please provide a last name.
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+          <div class="invalid-feedback">
+            Please provide a password.
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label for="confirm_password" class="form-label">Confirm Password</label>
+          <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+          <div class="invalid-feedback">
+            Please confirm your password.
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="type" class="form-label">User Type</label>
+          <select class="form-select" id="type" name="type" required>
+            <option value="user">Regular User</option>
+            <option value="organizer">Organizer</option>
+            <option value="admin">Admin</option>
+          </select>
+          <div class="invalid-feedback">
+            Please select a user type.
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label for="phone" class="form-label">Phone Number</label>
+          <input type="tel" class="form-control" id="phone" name="phone" required>
+          <div class="invalid-feedback">
+            Please provide a valid phone number.
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" value="1" id="is_active" name="is_active" checked>
+        <label class="form-check-label" for="is_active">
+          Active Account
+        </label>
+      </div>
+      
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" value="1" id="email_verified" name="email_verified">
+        <label class="form-check-label" for="email_verified">
+          Email Verified
+        </label>
+      </div>
+      
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Create User</button>
+        <a href="{% url 'superadmin:users' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

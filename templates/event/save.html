@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Setup - DCTFd{% endblock %}
+
+{% block content %}
+<div class="setup-container">
+    <div class="setup-header">
+        <h1>Confirm Event Setup</h1>
+        <p class="lead">Review your settings before creating your CTF event</p>
+    </div>
+    
+    <div class="setup-progress">
+        <div class="setup-progress-step completed">
+            <div class="setup-progress-step-num">1</div>
+            <span>Event Setup</span>
+        </div>
+        <div class="setup-progress-step active">
+            <div class="setup-progress-step-num">2</div>
+            <span>Confirmation</span>
+        </div>
+        <div class="setup-progress-step">
+            <div class="setup-progress-step-num">3</div>
+            <span>Complete</span>
+        </div>
+    </div>
+    
+    <div class="setup-section">
+        <h3>Event Details</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Name:</strong> {{ form_data.name }}</p>
+                <p><strong>Short Description:</strong> {{ form_data.short_description }}</p>
+                <p><strong>Access:</strong> {{ form_data.access }}</p>
+                <p><strong>Event Format:</strong> {{ form_data.event_format }}</p>
+            </div>
+            <div class="col-md-6">
+                {% if form_data.event_format != 'individual' %}
+                <p><strong>Min Team Size:</strong> {{ form_data.min_team_size }}</p>
+                <p><strong>Max Team Size:</strong> {{ form_data.max_team_size }}</p>
+                {% endif %}
+                <p><strong>Allow Individual Participants:</strong> {% if form_data.allow_individual_participants %}Yes{% else %}No{% endif %}</p>
+            </div>
+        </div>
+        <p><strong>Full Description:</strong></p>
+        <div class="card">
+            <div class="card-body">
+                {{ form_data.description }}
+            </div>
+        </div>
+    </div>
+    
+    <div class="setup-section">
+        <h3>Time Settings</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Timezone:</strong> {{ form_data.timezone }}</p>
+                <p><strong>Registration Start:</strong> {{ form_data.registration_start }}</p>
+                <p><strong>Registration End:</strong> {{ form_data.registration_end }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Event Start:</strong> {{ form_data.start_time }}</p>
+                <p><strong>Event End:</strong> {{ form_data.end_time }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="setup-section">
+        <h3>Admin Account</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Username:</strong> {{ form_data.admin_username }}</p>
+                <p><strong>Email:</strong> {{ form_data.admin_email }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Password:</strong> ••••••••</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="setup-section">
+        <h3>Appearance</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <p><strong>Theme:</strong> {{ form_data.theme }}</p>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>Primary Color:</strong> <span class="color-preview" style="background-color: {{ form_data.primary_color }}"></span> {{ form_data.primary_color }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Secondary Color:</strong> <span class="color-preview" style="background-color: {{ form_data.secondary_color }}"></span> {{ form_data.secondary_color }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Accent Color:</strong> <span class="color-preview" style="background-color: {{ form_data.accent_color }}"></span> {{ form_data.accent_color }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-4">
+                {% if has_logo %}
+                <p><strong>Logo:</strong> <span class="badge bg-success">Uploaded</span></p>
+                {% else %}
+                <p><strong>Logo:</strong> <span class="badge bg-secondary">Not uploaded</span></p>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                {% if has_banner %}
+                <p><strong>Banner:</strong> <span class="badge bg-success">Uploaded</span></p>
+                {% else %}
+                <p><strong>Banner:</strong> <span class="badge bg-secondary">Not uploaded</span></p>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                {% if has_favicon %}
+                <p><strong>Favicon:</strong> <span class="badge bg-success">Uploaded</span></p>
+                {% else %}
+                <p><strong>Favicon:</strong> <span class="badge bg-secondary">Not uploaded</span></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="setup-section">
+        <h3>Advanced Settings</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Require Email Verification:</strong> {% if settings_data.require_email_verification == 'True' %}Yes{% else %}No{% endif %}</p>
+                <p><strong>Auto Approve Participants:</strong> {% if settings_data.auto_approve_participants == 'True' %}Yes{% else %}No{% endif %}</p>
+                <p><strong>Show Challenges Before Start:</strong> {% if settings_data.show_challenges_before_start == 'True' %}Yes{% else %}No{% endif %}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Use Dynamic Scoring:</strong> {% if settings_data.use_dynamic_scoring == 'True' %}Yes{% else %}No{% endif %}</p>
+                <p><strong>Submission Cooldown:</strong> {{ settings_data.submission_cooldown }} seconds</p>
+                <p><strong>Max Submissions Per Minute:</strong> {{ settings_data.max_submissions_per_minute }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between mb-5">
+        <a href="{% url 'event:setup' %}" class="btn btn-secondary btn-lg">Go Back</a>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-lg">Confirm and Create</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

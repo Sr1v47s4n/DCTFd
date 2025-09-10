@@ -1,0 +1,32 @@
+{% extends "email/base_email.html" %}
+
+{% block email_title %}User Profile Updated{% endblock %}
+
+{% block email_content %}
+<p>Hello Admin,</p>
+
+<p>A user has updated their profile information:</p>
+
+<table style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Username:</strong></td>
+    <td style="padding: 8px; border: 1px solid #ddd;">{{ user.username }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Email:</strong></td>
+    <td style="padding: 8px; border: 1px solid #ddd;">{{ user.email }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Full Name:</strong></td>
+    <td style="padding: 8px; border: 1px solid #ddd;">{{ user.get_full_name }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Last Updated:</strong></td>
+    <td style="padding: 8px; border: 1px solid #ddd;">{{ user.date_modified }}</td>
+  </tr>
+</table>
+
+<p>You can view their full profile <a href="{{ protocol }}://{{ domain }}{% url 'users:public_profile' user.username %}">here</a>.</p>
+
+<p>DCTFd Admin Team</p>
+{% endblock %}

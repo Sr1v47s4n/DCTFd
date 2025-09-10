@@ -1,0 +1,881 @@
+{% extends "organizer/base.html" %}
+
+{% block dashboard_title %}Challenge Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="challenge-header">
+  <div class="challenge-title-section">
+    <h2>{{ challenge.name }}</h2>
+    <div class="challenge-meta">
+      <span class="challenge-category" style="background-color: {{ challenge.category.color }}">
+        {{ challenge.category.name }}
+      </span>
+      <span class="challenge-points">{{ challenge.value }} points</span>
+      <span class="challenge-difficulty">
+        Difficulty: 
+        {% for i in "12345" %}
+          <span class="difficulty-dot {% if forloop.counter <= challenge.difficulty %}active{% endif %}"></span>
+        {% endfor %}
+      </span>
+    </div>
+  </div>
+  
+  <div class="challenge-actions">
+    <a href="{% url 'organizer:edit_challenge' challenge.id %}" class="btn btn-primary">
+      <i class="fas fa-edit me-2"></i> Edit Challenge
+    </a>
+    <div class="dropdown">
+      <button class="btn btn-outline-primary dropdown-toggle" type="button" id="challengeActions" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-ellipsis-v"></i>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="challengeActions">
+        <li>
+          <a class="dropdown-item" href="{% url 'organizer:challenge_export' challenge.id %}">
+            <i class="fas fa-file-export me-2"></i> Export Challenge
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="{% url 'organizer:challenge_duplicate' challenge.id %}">
+            <i class="fas fa-copy me-2"></i> Duplicate
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#toggleVisibilityModal">
+            {% if challenge.is_visible %}
+            <i class="fas fa-eye-slash me-2"></i> Hide Challenge
+            {% else %}
+            <i class="fas fa-eye me-2"></i> Show Challenge
+            {% endif %}
+          </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          {% if request.user.is_admin %}
+          <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteChallengeModal">
+            <i class="fas fa-trash-alt me-2"></i> Delete Challenge
+          </a>
+          {% else %}
+          <a class="dropdown-item text-secondary" href="#" onclick="alert('Only administrators can delete challenges.')">
+            <i class="fas fa-trash-alt me-2"></i> Delete Challenge (Admin Only)
+          </a>
+          {% endif %}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-row">
+  <div class="dashboard-col-7">
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-info-circle me-2"></i> Challenge Information</h3>
+      </div>
+      <div class="card-body">
+        <div class="challenge-description">
+          {{ challenge.description|safe }}
+        </div>
+        
+        {% if challenge.hints.exists %}
+          <div class="challenge-hints mt-4">
+            <h4>Hints</h4>
+            <div class="hints-list">
+              {% for hint in challenge.hints.all %}
+                <div class="hint-item">
+                  <div class="hint-header">
+                    <span class="hint-title">Hint {{ forloop.counter }}</span>
+                    <span class="hint-cost">{{ hint.cost }} points</span>
+                  </div>
+                  <div class="hint-content">
+                    {{ hint.content }}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        
+        </div>
+        
+        {% if challenge.prerequisites.exists %}
+          <div class="challenge-prerequisites mt-4">
+            <h4><i class="fas fa-tasks me-2"></i> Prerequisites</h4>
+            <div class="prerequisites-list">
+              <p class="text-muted mb-2">Users must solve these challenges before this one becomes visible:</p>
+              <div class="list-group">
+                {% for prereq in challenge.prerequisites.all %}
+                  <a href="{% url 'organizer:challenge_detail' prereq.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    {{ prereq.name }}
+                    <span class="badge bg-primary">{{ prereq.value }} pts</span>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        
+        {% if challenge.unlocks.exists %}
+          <div class="challenge-unlocks mt-4">
+            <h4><i class="fas fa-unlock me-2"></i> Unlocks</h4>
+            <div class="unlocks-list">
+              <p class="text-muted mb-2">This challenge is a prerequisite for these challenges:</p>
+              <div class="list-group">
+                {% for unlock in challenge.unlocks.all %}
+                  <a href="{% url 'organizer:challenge_detail' unlock.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    {{ unlock.name }}
+                    <span class="badge bg-success">{{ unlock.value }} pts</span>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        
+        <div class="challenge-files mt-4">
+          <h4>Files</h4>
+          {% if challenge.files.exists %}
+            <div class="files-list">
+              {% for file in challenge.files.all %}
+                <div class="file-item">
+                  <div class="file-info">
+                    <i class="fas fa-file me-2"></i>
+                    <span class="file-name">{{ file.name }}</span>
+                    <span class="file-size">{{ file.size|filesizeformat }}</span>
+                  </div>
+                  <div class="file-actions">
+                    <a href="{{ file.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                      <i class="fas fa-download"></i>
+                    </a>
+                    <button class="btn btn-sm btn-outline-danger delete-file" data-id="{{ file.id }}" data-name="{{ file.name }}">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info">No files attached to this challenge.</div>
+          {% endif %}
+          
+          <form method="post" action="{% url 'organizer:challenge_file_add' challenge.id %}" enctype="multipart/form-data" class="mt-3">
+            {% csrf_token %}
+            <div class="input-group">
+              <input type="file" class="form-control" name="file" id="challengeFile">
+              <button class="btn btn-primary" type="submit">Upload</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dashboard-card mt-4">
+      <div class="card-header">
+        <h3><i class="fas fa-flag me-2"></i> Flags</h3>
+      </div>
+      <div class="card-body">
+        {% if challenge.flags.exists %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Type</th>
+                <th>Case Sensitive</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for flag in challenge.flags.all %}
+                <tr>
+                  <td>
+                    <code>{{ flag.content }}</code>
+                  </td>
+                  <td>
+                    {% if flag.type == 'static' %}
+                      <span class="badge bg-primary">Static</span>
+                    {% elif flag.type == 'regex' %}
+                      <span class="badge bg-info">Regex</span>
+                    {% else %}
+                      <span class="badge bg-secondary">{{ flag.type }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if flag.case_sensitive %}
+                      <i class="fas fa-check text-success"></i>
+                    {% else %}
+                      <i class="fas fa-times text-danger"></i>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary edit-flag" data-id="{{ flag.id }}" data-content="{{ flag.content }}" data-type="{{ flag.type }}" data-case="{{ flag.case_sensitive }}">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-flag" data-id="{{ flag.id }}">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="alert alert-warning">No flags defined for this challenge. Teams won't be able to submit answers.</div>
+        {% endif %}
+        
+        <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addFlagModal">
+          <i class="fas fa-plus me-2"></i> Add Flag
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-col-5">
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h3><i class="fas fa-chart-line me-2"></i> Statistics</h3>
+      </div>
+      <div class="card-body">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">{{ solve_count }}</div>
+            <div class="stat-label">Solves</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ attempts_count }}</div>
+            <div class="stat-label">Attempts</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ solve_percentage }}%</div>
+            <div class="stat-label">Solve Rate</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ current_points }}</div>
+            <div class="stat-label">Current Points</div>
+          </div>
+        </div>
+        
+        <div class="progress-chart mt-4">
+          <div class="chart-header">
+            <h4>Solve Progress</h4>
+            <div class="chart-meta">{{ solve_count }} / {{ team_count }} teams</div>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: {{ solve_percentage }}%;" 
+                 aria-valuenow="{{ solve_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dashboard-card mt-4">
+      <div class="card-header">
+        <h3><i class="fas fa-users me-2"></i> First Blood</h3>
+      </div>
+      <div class="card-body">
+        {% if first_solve %}
+          <div class="first-blood">
+            <div class="first-blood-icon">
+              <i class="fas fa-trophy"></i>
+            </div>
+            <div class="first-blood-info">
+              <div class="first-blood-team">
+                {{ first_solve.team.name }}
+              </div>
+              <div class="first-blood-time">
+                {{ first_solve.solved_at|date:"M d, Y H:i:s" }}
+              </div>
+              <div class="first-blood-elapsed">
+                Solved {{ first_solve.time_elapsed }} after challenge release
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No team has solved this challenge yet.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="dashboard-card mt-4">
+      <div class="card-header">
+        <h3><i class="fas fa-file-alt me-2"></i> Recent Submissions</h3>
+      </div>
+      <div class="card-body">
+        {% if recent_submissions %}
+          <div class="submission-list">
+            {% for submission in recent_submissions %}
+              <div class="submission-item">
+                <div class="submission-team">{{ submission.team.name }}</div>
+                <div class="submission-content">
+                  <code>{{ submission.submission }}</code>
+                </div>
+                <div class="submission-meta">
+                  <div class="submission-time">{{ submission.submitted_at|date:"M d, H:i" }}</div>
+                  <div class="submission-status">
+                    {% if submission.is_correct %}
+                      <span class="badge bg-success">Correct</span>
+                    {% else %}
+                      <span class="badge bg-danger">Incorrect</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+          
+          <a href="{% url 'organizer:challenge_submissions' challenge.id %}" class="btn btn-outline-primary btn-sm mt-3">
+            View All Submissions
+          </a>
+        {% else %}
+          <div class="alert alert-info">No submissions for this challenge yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Flag Modal -->
+<div class="modal fade" id="addFlagModal" tabindex="-1" aria-labelledby="addFlagModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addFlagModalLabel">Add Flag</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'organizer:flag_add' challenge.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="flagContent" class="form-label">Flag</label>
+            <input type="text" class="form-control" id="flagContent" name="content" required>
+            <div class="form-text">For static flags, enter the exact flag. For regex flags, enter a valid regular expression.</div>
+          </div>
+          <div class="mb-3">
+            <label for="flagType" class="form-label">Flag Type</label>
+            <select class="form-select" id="flagType" name="type">
+              <option value="static">Static</option>
+              <option value="regex">Regex</option>
+            </select>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="caseSensitive" name="case_sensitive" checked>
+            <label class="form-check-label" for="caseSensitive">
+              Case Sensitive
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Flag</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Challenge Modal -->
+<div class="modal fade" id="deleteChallengeModal" tabindex="-1" aria-labelledby="deleteChallengeModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteChallengeModalLabel">Delete Challenge</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if request.user.is_admin %}
+        <p>Are you sure you want to delete the challenge <strong>{{ challenge.name }}</strong>?</p>
+        <p class="text-danger">This action cannot be undone. All submissions, files, and hints for this challenge will be deleted.</p>
+        {% else %}
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i> Only administrators can delete challenges.
+        </div>
+        <p>As an organizer, you can modify and hide challenges, but deletion is restricted to administrators.</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{% url 'organizer:challenge_delete' challenge.id %}">
+          {% csrf_token %}
+          {% if request.user.is_admin %}
+          <button type="submit" class="btn btn-danger">Delete Challenge</button>
+          {% else %}
+          <button type="button" class="btn btn-danger" disabled>Delete Challenge (Admin Only)</button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toggle Visibility Modal -->
+<div class="modal fade" id="toggleVisibilityModal" tabindex="-1" aria-labelledby="toggleVisibilityModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        {% if challenge.is_visible %}
+        <h5 class="modal-title" id="toggleVisibilityModalLabel">Hide Challenge</h5>
+        {% else %}
+        <h5 class="modal-title" id="toggleVisibilityModalLabel">Show Challenge</h5>
+        {% endif %}
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% if challenge.is_visible %}
+        <p>Are you sure you want to hide the challenge <strong>{{ challenge.name }}</strong>?</p>
+        <p>This will make the challenge invisible to participants until you show it again.</p>
+        {% else %}
+        <p>Are you sure you want to show the challenge <strong>{{ challenge.name }}</strong>?</p>
+        <p>This will make the challenge visible to participants.</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{% url 'organizer:toggle_challenge_visibility' challenge.id %}">
+          {% csrf_token %}
+          {% if challenge.is_visible %}
+          <button type="submit" class="btn btn-warning">
+            <i class="fas fa-eye-slash me-2"></i> Hide Challenge
+          </button>
+          {% else %}
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-eye me-2"></i> Show Challenge
+          </button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+  }
+  
+  .challenge-title-section h2 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+  }
+  
+  .challenge-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .challenge-category {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+  }
+  
+  .challenge-points {
+    font-weight: 600;
+    color: var(--accent-color);
+  }
+  
+  .challenge-difficulty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+  }
+  
+  .difficulty-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--dark-border);
+    display: inline-block;
+  }
+  
+  .difficulty-dot.active {
+    background-color: var(--primary-color);
+  }
+  
+  .challenge-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .dashboard-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-col-7 {
+    flex: 7;
+    min-width: 0;
+  }
+  
+  .dashboard-col-5 {
+    flex: 5;
+    min-width: 0;
+  }
+  
+  @media (max-width: 992px) {
+    .dashboard-row {
+      flex-direction: column;
+    }
+    
+    .dashboard-col-7, .dashboard-col-5 {
+      flex: 1 1 100%;
+    }
+  }
+  
+  .challenge-description {
+    line-height: 1.6;
+  }
+  
+  .challenge-description pre {
+    background-color: var(--dark-card-alt);
+    padding: 15px;
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  
+  .challenge-description code {
+    font-family: monospace;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+  
+  .challenge-description img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+  
+  .challenge-hints h4, .challenge-files h4 {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--dark-border);
+  }
+  
+  .hints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .hint-item {
+    background-color: var(--dark-card-alt);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .hint-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .hint-title {
+    font-weight: 600;
+  }
+  
+  .hint-cost {
+    color: var(--accent-color);
+    font-weight: 600;
+  }
+  
+  .hint-content {
+    padding: 15px;
+  }
+  
+  .files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--dark-card-alt);
+    border-radius: 4px;
+  }
+  
+  .file-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .file-name {
+    margin-right: 10px;
+    font-weight: 600;
+  }
+  
+  .file-size {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+  
+  .file-actions {
+    display: flex;
+    gap: 5px;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .stat-item {
+    background-color: var(--dark-card-alt);
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+  
+  .stat-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .chart-header h4 {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  .chart-meta {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  
+  .first-blood {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .first-blood-icon {
+    font-size: 2rem;
+    color: gold;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .first-blood-team {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+  }
+  
+  .first-blood-time {
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+  
+  .first-blood-elapsed {
+    font-size: 0.9rem;
+    color: var(--accent-color);
+  }
+  
+  .submission-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .submission-item {
+    padding: 10px;
+    background-color: var(--dark-card-alt);
+    border-radius: 4px;
+  }
+  
+  .submission-team {
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  
+  .submission-content {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    word-break: break-all;
+  }
+  
+  .submission-content code {
+    font-family: monospace;
+  }
+  
+  .submission-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+  
+  .submission-time {
+    color: var(--text-muted);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Store challenge ID for use in JavaScript
+    const challengeId = {{ challenge.id }};
+    
+    // Edit flag functionality
+    const editFlagButtons = document.querySelectorAll('.edit-flag');
+    
+    editFlagButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const flagId = this.dataset.id;
+        const flagContent = this.dataset.content;
+        const flagType = this.dataset.type;
+        const flagCase = this.dataset.case === 'True';
+        
+        // Create edit modal
+        const modal = document.createElement('div');
+        modal.classList.add('modal', 'fade');
+        modal.id = 'editFlagModal';
+        modal.tabIndex = '-1';
+        modal.setAttribute('aria-labelledby', 'editFlagModalLabel');
+        modal.setAttribute('aria-hidden', 'true');
+        
+        modal.innerHTML = `
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editFlagModalLabel">Edit Flag</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form method="post" action="/organizer/challenges/${challengeId}/flags/${flagId}/edit/">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label for="flagContent" class="form-label">Flag</label>
+                    <input type="text" class="form-control" id="flagContent" name="content" value="${flagContent}" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="flagType" class="form-label">Flag Type</label>
+                    <select class="form-select" id="flagType" name="type">
+                      <option value="static" ${flagType === 'static' ? 'selected' : ''}>Static</option>
+                      <option value="regex" ${flagType === 'regex' ? 'selected' : ''}>Regex</option>
+                    </select>
+                  </div>
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="caseSensitive" name="case_sensitive" ${flagCase ? 'checked' : ''}>
+                    <label class="form-check-label" for="caseSensitive">
+                      Case Sensitive
+                    </label>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Show the modal
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+        
+        // Clean up when the modal is hidden
+        modal.addEventListener('hidden.bs.modal', function() {
+          document.body.removeChild(modal);
+        });
+      });
+    });
+    
+    // Delete flag functionality
+    const deleteFlagButtons = document.querySelectorAll('.delete-flag');
+    
+    deleteFlagButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const flagId = this.dataset.id;
+        
+        if (confirm('Are you sure you want to delete this flag? This action cannot be undone.')) {
+          // Create a form and submit it
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/organizer/challenges/${challengeId}/flags/${flagId}/delete/`;
+          
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = 'csrfmiddlewaretoken';
+          csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          
+          form.appendChild(csrfInput);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    });
+    
+    // Delete file functionality
+    const deleteFileButtons = document.querySelectorAll('.delete-file');
+    
+    deleteFileButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const fileId = this.dataset.id;
+        const fileName = this.dataset.name;
+        
+        if (confirm(`Are you sure you want to delete the file "${fileName}"? This action cannot be undone.`)) {
+          // Create a form and submit it
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/organizer/challenges/${challengeId}/files/${fileId}/delete/`;
+          
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = 'csrfmiddlewaretoken';
+          csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          
+          form.appendChild(csrfInput);
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

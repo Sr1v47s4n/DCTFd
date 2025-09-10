@@ -1,0 +1,285 @@
+{% extends "users/base.html" %}
+{% load static %}
+{% load avatar_tags %}
+
+{% block title %}Edit Team Profile - DCTFd{% endblock %}
+
+{% block extra_head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/components/avatar-selector.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/avatar-upload.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0">Edit Team Profile</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5>Basic Information</h5>
+                                <hr>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                                    {{ form.name }}
+                                    <small class="text-muted">Team name cannot be changed</small>
+                                    {% if form.name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.country.id_for_label }}" class="form-label">{{ form.country.label }}</label>
+                                    {{ form.country }}
+                                    {% if form.country.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.country.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.affiliation.id_for_label }}" class="form-label">{{ form.affiliation.label }}</label>
+                                    {{ form.affiliation }}
+                                    <small class="text-muted">{{ form.affiliation.help_text }}</small>
+                                    {% if form.affiliation.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.affiliation.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.website.id_for_label }}" class="form-label">{{ form.website.label }}</label>
+                                    {{ form.website }}
+                                    <small class="text-muted">{{ form.website.help_text }}</small>
+                                    {% if form.website.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.website.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                                    {{ form.description }}
+                                    <small class="text-muted">{{ form.description.help_text }}</small>
+                                    {% if form.description.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.description.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h5>Team Avatar</h5>
+                                <hr>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.avatar.label }}</label>
+                                    <div class="avatar-selection-container">
+                                        {% if team.avatar or team.logo %}
+                                        <div class="current-avatar mb-3">
+                                            <img src="{{ team.get_avatar_url }}" alt="Current avatar">
+                                            <div class="current-avatar-text">
+                                                <p>Your current team avatar</p>
+                                                <small>Select a new avatar from the options below</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div id="avatar-selection-container">
+                                            {% render_avatar_selection form.avatar %}
+                                        </div>
+                                    </div>
+                                    
+                                    {% if form.avatar.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.avatar.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="custom-avatar-section">
+                                    <h6>Upload Custom Team Logo</h6>
+                                    <small class="text-muted mb-2 d-block">This will override the selected avatar above</small>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.logo.id_for_label }}" class="form-label">{{ form.logo.label }}</label>
+                                        {{ form.logo }}
+                                        <small class="text-muted">{{ form.logo.help_text }}</small>
+                                        {% if form.logo.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.logo.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12 d-flex justify-content-between">
+                                <a href="{% url 'teams:profile' %}" class="btn btn-outline-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // File upload preview
+    const fileInput = document.querySelector('input[type="file"]');
+    const currentAvatarImg = document.querySelector('.current-avatar img');
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    if (currentAvatarImg) {
+                        currentAvatarImg.src = e.target.result;
+                        
+                        // Update the avatar description
+                        const avatarText = currentAvatarImg.nextElementSibling;
+                        if (avatarText) {
+                            const p = avatarText.querySelector('p') || document.createElement('p');
+                            const small = avatarText.querySelector('small') || document.createElement('small');
+                            
+                            p.textContent = 'Custom logo selected';
+                            small.textContent = 'Will be set as your team logo when saved';
+                            
+                            if (!avatarText.contains(p)) avatarText.appendChild(p);
+                            if (!avatarText.contains(small)) avatarText.appendChild(small);
+                        }
+                    }
+                };
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+    
+    // Avatar selection handling
+    const avatarRadios = document.querySelectorAll('.avatar-radio');
+    
+    avatarRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Remove selected class from all options
+            document.querySelectorAll('.avatar-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to the parent of the checked radio
+            if (this.checked) {
+                this.closest('.avatar-option').classList.add('selected');
+            }
+            
+            // Update the preview image
+            if (currentAvatarImg) {
+                const selectedAvatarImg = this.closest('.avatar-option').querySelector('img');
+                if (selectedAvatarImg) {
+                    // Add timestamp to force refresh
+                    const timestamp = new Date().getTime();
+                    currentAvatarImg.src = selectedAvatarImg.src + '?_t=' + timestamp;
+                    
+                    // Update the avatar description
+                    const avatarText = currentAvatarImg.nextElementSibling;
+                    if (avatarText) {
+                        const p = avatarText.querySelector('p') || document.createElement('p');
+                        const small = avatarText.querySelector('small') || document.createElement('small');
+                        
+                        p.textContent = 'Selected avatar';
+                        small.textContent = 'Will be set as your team avatar when saved';
+                        
+                        if (!avatarText.contains(p)) avatarText.appendChild(p);
+                        if (!avatarText.contains(small)) avatarText.appendChild(small);
+                    }
+                }
+            }
+        });
+    });
+    
+    // Debug form submission
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        console.log('Form submission triggered');
+        
+        // Find which avatar is selected
+        const avatarRadios = document.querySelectorAll('input[name="avatar"]');
+        let selectedAvatar = null;
+        
+        avatarRadios.forEach(radio => {
+            if (radio.checked) {
+                selectedAvatar = radio.value;
+            }
+        });
+        
+        console.log('Selected avatar at submission:', selectedAvatar);
+        console.log('Custom file upload:', fileInput ? (fileInput.files[0] ? fileInput.files[0].name : 'No file selected') : 'No file input found');
+        
+        // Add a hidden debug field to verify form data is correctly sent
+        const debugField = document.createElement('input');
+        debugField.type = 'hidden';
+        debugField.name = 'debug_timestamp';
+        debugField.value = new Date().getTime();
+        form.appendChild(debugField);
+    });
+});
+</script>
+{% endblock %}

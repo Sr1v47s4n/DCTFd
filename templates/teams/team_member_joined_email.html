@@ -1,0 +1,29 @@
+{% extends "email/base_email.html" %}
+
+{% block email_title %}New Team Member{% endblock %}
+
+{% block email_content %}
+<p>Hello {{ captain.username }},</p>
+
+<p>A new member has joined your team <strong>{{ team.name }}</strong> on DCTFd.</p>
+
+<table style="border-collapse: collapse; width: 100%;">
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Username:</strong></td>
+    <td style="padding: 8px; border: 1px solid #ddd;">{{ member.username }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Name:</strong></td>
+    <td style="padding: 8px; border: 1px solid #ddd;">{{ member.get_full_name }}</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px; border: 1px solid #ddd;"><strong>Joined On:</strong></td>
+    <td style="padding: 8px; border: 1px solid #ddd;">{{ member.date_joined|date:"F j, Y" }}</td>
+  </tr>
+</table>
+
+<p>You can view your team's page <a href="{{ protocol|default:'http' }}://{{ domain }}{% url 'teams:team_detail' team.id %}">here</a>.</p>
+
+<p>Thank you,<br>
+The DCTFd Team</p>
+{% endblock %}
