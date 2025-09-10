@@ -66,17 +66,45 @@ function initScoreGraph() {
     }
     
     try {
-        const data = JSON.parse(scoreData);
+        // Validate JSON before parsing
+        if (scoreData.trim() === "" || scoreData === "{}") {
+            graphContainer.innerHTML = '<div class="alert alert-info">No score data available yet. Complete challenges to see your progress!</div>';
+            return;
+        }
+        
+        let data;
+        try {
+            data = JSON.parse(scoreData);
+        } catch (parseError) {
+            console.error('JSON Parse Error:', parseError);
+            // Try to identify the problem in the JSON string
+            const errorPosition = parseError.message.match(/position (\d+)/);
+            let errorContext = '';
+            
+            if (errorPosition && errorPosition[1]) {
+                const pos = parseInt(errorPosition[1]);
+                const start = Math.max(0, pos - 20);
+                const end = Math.min(scoreData.length, pos + 20);
+                errorContext = `...${scoreData.substring(start, pos)}👉${scoreData.substring(pos, end)}...`;
+            }
+            
+            graphContainer.innerHTML = `<div class="alert alert-danger">
+                <p>Error parsing score data: ${parseError.message}</p>
+                ${errorContext ? `<p>Error near: <code>${errorContext}</code></p>` : ''}
+                <p>Please contact an administrator.</p>
+            </div>`;
+            return;
+        }
         
         // Check if data is empty
-        if (Object.keys(data).length === 0) {
+        if (!data || Object.keys(data).length === 0) {
             graphContainer.innerHTML = '<div class="alert alert-info">No score data available yet. Complete challenges to see your progress!</div>';
             return;
         }
         
         renderScoreGraph(graphContainer, data);
     } catch (e) {
-        console.error('Error parsing score data:', e);
+        console.error('Error processing score data:', e);
         graphContainer.innerHTML = '<div class="alert alert-danger">Error processing score data: ' + e.message + '</div>';
     }
 }
@@ -116,6 +144,19 @@ function renderScoreGraph(container, data) {
     // Process data for the chart
     try {
         if (typeof data === 'object' && !Array.isArray(data)) {
+            // Validate and ensure all data has the expected structure
+            let isValid = true;
+            Object.entries(data).forEach(([timestamp, teamData]) => {
+                if (typeof teamData !== 'object' || Array.isArray(teamData)) {
+                    console.error(`Invalid data structure at timestamp ${timestamp}`, teamData);
+                    isValid = false;
+                }
+            });
+            
+            if (!isValid) {
+                throw new Error('Invalid data structure in score progression data');
+            }
+            
             // Get all team/user names
             const participants = new Set();
             Object.values(data).forEach(timestampData => {
@@ -129,14 +170,18 @@ function renderScoreGraph(container, data) {
                 
                 // Convert timestamps to data points
                 Object.keys(data).sort((a, b) => parseInt(a) - parseInt(b)).forEach(ts => {
-                    const timestamp = parseInt(ts);
-                    const score = data[ts][name] || null;
-                    
-                    if (score !== null) {
-                        scoreData.push({
-                            x: new Date(eventStart + (timestamp * 1000)),
-                            y: score
-                        });
+                    try {
+                        const timestamp = parseInt(ts);
+                        const score = data[ts][name] || null;
+                        
+                        if (score !== null) {
+                            scoreData.push({
+                                x: new Date(eventStart + (timestamp * 1000)),
+                                y: score
+                            });
+                        }
+                    } catch (err) {
+                        console.warn(`Error processing timestamp ${ts} for team ${name}:`, err);
                     }
                 });
                 

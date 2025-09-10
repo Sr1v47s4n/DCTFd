@@ -1,75 +1,101 @@
 /* Organizer Dashboard - Layout and components specific to the organizer interface */
 
 /* Main layout structure */
-.organizer-dashboard {
+.dashboard-container {
   display: flex;
   min-height: 100vh;
 }
 
-.organizer-sidebar {
-  width: var(--sidebar-width, 250px);
-  background-color: #2c3e50;
-  color: #ecf0f1;
+.dashboard-nav {
+  width: 250px;
+  background-color: var(--dark-color, #1e1e2d);
+  color: var(--text-light, #ffffff);
   transition: width 0.3s ease;
   position: fixed;
   height: 100vh;
   overflow-y: auto;
   z-index: 1000;
+  padding: 0;
 }
 
-.organizer-sidebar.collapsed {
-  width: var(--sidebar-collapsed, 70px);
-}
-
-.organizer-sidebar-header {
+.dashboard-logo {
   padding: 20px;
   display: flex;
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.organizer-sidebar-logo {
-  height: 40px;
-  margin-right: 10px;
-}
-
-.organizer-sidebar-title {
+.dashboard-logo h2 {
+  color: var(--text-light);
   font-size: 18px;
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  opacity: 1;
-  transition: opacity 0.2s ease;
+  margin: 0;
 }
 
-.collapsed .organizer-sidebar-title {
-  opacity: 0;
-  width: 0;
+.dashboard-logo i {
+  margin-right: 10px;
+  color: var(--primary-light);
 }
 
-.organizer-content {
+.dashboard-content {
   flex: 1;
-  margin-left: var(--sidebar-width, 250px);
+  margin-left: 250px;
   padding: 20px;
   transition: margin-left 0.3s ease;
+  background-color: var(--light-color, #f5f8fa);
+  min-height: 100vh;
 }
 
-.sidebar-collapsed .organizer-content {
-  margin-left: var(--sidebar-collapsed, 70px);
+/* User section in sidebar */
+.user-section {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 15px;
 }
 
-/* Sidebar navigation */
-.organizer-nav {
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-light);
+}
+
+.user-info {
+  margin-left: 10px;
+  overflow: hidden;
+}
+
+.user-name {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Navigation menu */
+.nav-menu {
   list-style: none;
   padding: 0;
-  margin: 20px 0;
+  margin: 0;
 }
 
-.organizer-nav-item {
-  margin-bottom: 5px;
+.nav-item {
+  margin-bottom: 2px;
 }
 
-.organizer-nav-link {
+.nav-link {
   display: flex;
   align-items: center;
   padding: 12px 20px;
@@ -79,22 +105,100 @@
   border-left: 3px solid transparent;
 }
 
-.organizer-nav-link:hover, 
-.organizer-nav-link.active {
+.nav-link:hover,
+.nav-link.active {
   background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border-left-color: #3498db;
+  color: white;
+  border-left-color: var(--primary-light);
 }
 
-.organizer-nav-icon {
+.nav-link i {
   margin-right: 15px;
   width: 20px;
   text-align: center;
-  font-size: 18px;
 }
 
-.collapsed .organizer-nav-text {
-  display: none;
+/* Stats cards on dashboard */
+.stats-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.stats-card-title {
+  font-size: 14px;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.stats-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+}
+
+.stats-card-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-dark);
+}
+
+.stats-card-trend {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.stats-card-trend.positive {
+  color: var(--success-color);
+}
+
+.stats-card-trend.negative {
+  color: var(--danger-color);
+}
+
+/* Page header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.page-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .organizer-nav-badge {

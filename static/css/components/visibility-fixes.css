@@ -1,0 +1,249 @@
+
+body, html {
+  color: #2c2c2c !important;
+  background-color: #f8f9ff !important;
+}
+
+/* Card components */
+.card, .card-body, .modal-content, .modal-body {
+  background-color: #ffffff !important;
+  color: #2c2c2c !important;
+}
+
+.card-header, .modal-header {
+  background-color: #f5f8fa !important;
+  color: #2c2c2c !important;
+}
+
+/* Form elements */
+.form-control, .form-select, input, textarea, select {
+  background-color: #ffffff !important;
+  color: #2c2c2c !important;
+  border: 1px solid #dee2e6 !important;
+}
+
+.form-control:focus, .form-select:focus, input:focus, textarea:focus, select:focus {
+  background-color: #ffffff !important;
+  color: #2c2c2c !important;
+  border-color: #4e31aa !important;
+  box-shadow: 0 0 0 0.25rem rgba(78, 49, 170, 0.25) !important;
+}
+
+.form-label, label {
+  color: #2c2c2c !important;
+  font-weight: 500;
+}
+
+/* Tables */
+.table, .table th, .table td {
+  color: #2c2c2c !important;
+  background-color: #ffffff !important;
+}
+
+.table thead th {
+  background-color: #f5f8fa !important;
+  color: #3a2683 !important;
+  border-bottom: 2px solid #dee2e6 !important;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 10px 20px;
+}
+
+.btn-primary {
+  background-color: #4e31aa !important;
+  border-color: #4e31aa !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover {
+  background-color: #3a2683 !important;
+  border-color: #3a2683 !important;
+  color: #ffffff !important;
+}
+
+.btn-outline-primary {
+  color: #4e31aa !important;
+  border-color: #4e31aa !important;
+  background-color: transparent;
+}
+
+.btn-outline-primary:hover {
+  background-color: #4e31aa !important;
+  border-color: #4e31aa !important;
+  color: #ffffff !important;
+}
+
+.btn-secondary {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: #ffffff !important;
+}
+
+.btn-danger {
+  background-color: #e74c3c !important;
+  border-color: #e74c3c !important;
+  color: #ffffff !important;
+}
+
+.btn-success {
+  background-color: #2ecc71 !important;
+  border-color: #2ecc71 !important;
+  color: #ffffff !important;
+}
+
+/* Text elements */
+h1, h2, h3, h4, h5, h6, p, div, span, li, td, th {
+  color: #2c2c2c !important;
+}
+
+/* Links */
+a {
+  color: #4e31aa !important;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #3a2683 !important;
+}
+
+/* Alerts and messages */
+.alert {
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: none;
+}
+
+.alert-success {
+  background-color: rgba(46, 204, 113, 0.1) !important;
+  border-left: 4px solid #2ecc71 !important;
+  color: #27ae60 !important;
+}
+
+.alert-danger {
+  background-color: rgba(231, 76, 60, 0.1) !important;
+  border-left: 4px solid #e74c3c !important;
+  color: #c0392b !important;
+}
+
+.alert-warning {
+  background-color: rgba(243, 156, 18, 0.1) !important;
+  border-left: 4px solid #f39c12 !important;
+  color: #d35400 !important;
+}
+
+.alert-info {
+  background-color: rgba(52, 152, 219, 0.1) !important;
+  border-left: 4px solid #3498db !important;
+  color: #2980b9 !important;
+}
+
+/* Badges */
+.badge {
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.badge.bg-primary {
+  background-color: #4e31aa !important;
+  color: #ffffff !important;
+}
+
+.badge.bg-success {
+  background-color: #2ecc71 !important;
+  color: #ffffff !important;
+}
+
+.badge.bg-danger {
+  background-color: #e74c3c !important;
+  color: #ffffff !important;
+}
+
+.badge.bg-warning {
+  background-color: #f39c12 !important;
+  color: #ffffff !important;
+}
+
+.badge.bg-secondary {
+  background-color: #6c757d !important;
+  color: #ffffff !important;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  background-color: #ffffff !important;
+  border: 1px solid #dee2e6 !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+}
+
+.dropdown-item {
+  color: #2c2c2c !important;
+  padding: 10px 15px;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f8fa !important;
+  color: #4e31aa !important;
+}
+
+/* Specific organizer styling fixes */
+.settings-card, .inner-card {
+  background-color: #ffffff !important;
+  border: 1px solid #dee2e6 !important;
+  color: #2c2c2c !important;
+}
+
+.file-item, .flag-item, .hint-item {
+  background-color: #f8f9fa !important;
+  border: 1px solid #dee2e6 !important;
+  color: #2c2c2c !important;
+}
+
+/* Navigation sidebar text (keep white for dark backgrounds) */
+.dashboard-nav, .dashboard-nav * {
+  color: #ffffff !important;
+}
+
+.dashboard-nav .dashboard-menu li a {
+  color: #ffffff !important;
+}
+
+.dashboard-nav .dashboard-logo h2 {
+  color: #ffffff !important;
+}
+
+.dashboard-nav .dashboard-footer a {
+  color: #b3b3cc !important;
+}
+
+.dashboard-nav .dashboard-footer a:hover {
+  color: #ffffff !important;
+}
+
+/* Override any global text color rules for sidebar */
+.dashboard-nav h1, .dashboard-nav h2, .dashboard-nav h3, .dashboard-nav h4, .dashboard-nav h5, .dashboard-nav h6, 
+.dashboard-nav p, .dashboard-nav div, .dashboard-nav span, .dashboard-nav li {
+  color: #ffffff !important;
+}
+
+/* Override any remaining transparent or undefined variable issues */
+* {
+  border-color: #dee2e6 !important;
+}
+
+*:not(.dashboard-nav):not(.dashboard-nav *):not(.btn-primary):not(.btn-danger):not(.btn-success):not(.badge) {
+  background-color: transparent;
+}
+
+/* Ensure form elements and content areas have solid backgrounds */
+.form-control, .card, .modal-content, .table, .dropdown-menu, 
+.settings-card, .inner-card, .file-item, .flag-item, .hint-item {
+  background-color: #ffffff !important;
+}

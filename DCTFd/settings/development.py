@@ -31,15 +31,19 @@ SITE_NAME = EVENT_NAME
 ALLOWED_HOSTS = ["*"]
 
 # Database - use PostgreSQL from Docker for both environments
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get(
-            'DATABASE_URL', 
-            f"postgres://{os.environ.get('DB_USER', 'dctfd_user')}:{os.environ.get('DB_PASSWORD', 'dctfd_postgres_password')}@{os.environ.get('DB_HOST', 'db')}:{os.environ.get('DB_PORT', '5432')}/{os.environ.get('DB_NAME', 'dctfd_db')}"
-        ),
-        conn_max_age=600
-    )
-}
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    # Use dj_database_url to parse the DATABASE_URL
+    DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+else:
+    # Default to SQLite for development if DATABASE_URL is not set
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        }
+    }
 
 # For development, use console email backend
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

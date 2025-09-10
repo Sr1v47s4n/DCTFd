@@ -1,8 +1,23 @@
 /* Organizer Theme - Styles specific to organizer interface */
 
 :root {
+  /* Global palette - shared with admin */
+  --primary-color: #4e31aa;
+  --primary-dark: #3a2683;
+  --primary-light: #6545c9;
+  --accent-color: #ff5722;
+  --success-color: #2ecc71;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+  --dark-color: #1e1e2d;
+  --light-color: #f5f8fa;
+  --text-light: #ffffff;
+  --text-dark: #2c2c2c;
+  --gray-light: #eaeaea;
+  --gray: #999999;
+  
   /* Organizer-specific color palette */
-  --organizer-primary: #3949ab;
+  --organizer-primary: var(--primary-color);
   --organizer-secondary: #00acc1;
   --organizer-accent: #ffab00;
   --organizer-background: #f5f7fa;
@@ -10,13 +25,24 @@
   --organizer-border: #e0e6ed;
   --organizer-text: #37474f;
   --organizer-text-light: #78909c;
-  --organizer-danger: #f44336;
-  --organizer-warning: #ff9800;
-  --organizer-success: #4caf50;
+  --organizer-danger: var(--danger-color);
+  --organizer-warning: var(--warning-color);
+  --organizer-success: var(--success-color);
   --organizer-info: #2196f3;
 }
 
+/* Organizer navigation */
+.organizer-nav {
+  background-color: var(--dark-color);
+  background-image: linear-gradient(to bottom, var(--dark-color), #2d2d42);
+  color: var(--text-light);
+}
+
 /* Base styling for organizer interface */
+.organizer-body {
+  background-color: var(--organizer-background);
+}
+
 .organizer-container {
   background-color: var(--organizer-background);
   min-height: 100vh;

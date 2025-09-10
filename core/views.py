@@ -246,9 +246,13 @@ def generate_team_score_graph_data(teams, event):
         else (
             submissions.first().submitted_at
             if submissions.exists()
-            else datetime.datetime.now()
+            else timezone.now()
         )
     )
+
+    # Ensure event_start is timezone-aware
+    if event_start.tzinfo is None:
+        event_start = timezone.make_aware(event_start)
 
     # Generate timestamps and scores
     for submission in submissions:
@@ -258,35 +262,57 @@ def generate_team_score_graph_data(teams, event):
 
         # Update team's score
         team_id = submission.team.id
+        
+        # Skip if team is not in our list (might have been deleted)
+        if team_id not in team_scores:
+            continue
+            
         team_scores[team_id] += submission.challenge.value
 
         # Calculate timestamp in seconds since event start
         timestamp = int((submission.submitted_at - event_start).total_seconds())
+        timestamp_key = str(timestamp)  # Convert to string for JSON key
 
         # Ensure timestamp exists in the data
-        if timestamp not in score_data:
-            score_data[timestamp] = {}
+        if timestamp_key not in score_data:
+            score_data[timestamp_key] = {}
 
             # Add current scores for all teams at this timestamp
             for t_id, score in team_scores.items():
-                team_name = teams.get(id=t_id).name
-                score_data[timestamp][team_name] = score
+                try:
+                    team_name = teams.get(id=t_id).name
+                    score_data[timestamp_key][team_name] = score
+                except Exception as e:
+                    # Skip this team if there's an error
+                    continue
         else:
             # Just update this team's score
-            team_name = teams.get(id=team_id).name
-            score_data[timestamp][team_name] = team_scores[team_id]
+            try:
+                team_name = teams.get(id=team_id).name
+                score_data[timestamp_key][team_name] = team_scores[team_id]
+            except Exception as e:
+                # Skip this team if there's an error
+                continue
 
     # If no submissions exist or not enough data points, create sample data
     if len(score_data) < 2:
         # Add initial point at event start (0 scores)
-        score_data[0] = {team.name: 0 for team in teams}
+        score_data["0"] = {}
+        for team in teams:
+            score_data["0"][team.name] = 0
 
         # Add current point at "now" with current scores
-        now_timestamp = int((datetime.datetime.now() - event_start).total_seconds())
-        score_data[now_timestamp] = {team.name: team.score for team in teams}
+        now_timestamp = str(int((timezone.now() - event_start).total_seconds()))
+        score_data[now_timestamp] = {}
+        for team in teams:
+            score_data[now_timestamp][team.name] = team.score
 
-    # Convert to JSON
-    return json.dumps(score_data)
+    try:
+        # Convert to JSON
+        return json.dumps(score_data)
+    except Exception as e:
+        # If JSON serialization fails, return an empty JSON object
+        return "{}"
 
 
 def generate_user_score_graph_data(users, event):
@@ -313,7 +339,11 @@ def generate_user_score_graph_data(users, event):
     user_scores = {user.id: 0 for user in users}
     
     # Get the event start time for timestamp calculation
-    event_start = event.start_time if event and event.start_time else submissions.first().submitted_at if submissions.exists() else datetime.datetime.now()
+    event_start = event.start_time if event and event.start_time else submissions.first().submitted_at if submissions.exists() else timezone.now()
+    
+    # Ensure event_start is timezone-aware
+    if event_start.tzinfo is None:
+        event_start = timezone.make_aware(event_start)
     
     # Generate timestamps and scores
     for submission in submissions:
@@ -347,7 +377,7 @@ def generate_user_score_graph_data(users, event):
         score_data[0] = {user.username: 0 for user in users}
         
         # Add current point at "now" with current scores
-        now_timestamp = int((datetime.datetime.now() - event_start).total_seconds())
+        now_timestamp = int((timezone.now() - event_start).total_seconds())
         score_data[now_timestamp] = {user.username: user.score for user in users if hasattr(user, 'score')}
     
     # Convert to JSON

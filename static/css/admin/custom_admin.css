@@ -1,20 +1,155 @@
 /* Custom Admin Styles */
 
 :root {
-    --dctfd-primary: #4a148c;
-    --dctfd-secondary: #7b1fa2;
-    --dctfd-accent: #e91e63;
-    --dctfd-light: #f3e5f5;
-    --dctfd-dark: #311b92;
-    --dctfd-success: #43a047;
-    --dctfd-warning: #ffb300;
-    --dctfd-danger: #e53935;
+    /* Admin color palette */
+    --primary-color: #4e31aa;
+    --primary-dark: #3a2683;
+    --primary-light: #6545c9;
+    --accent-color: #ff5722;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --dark-color: #1e1e2d;
+    --light-color: #f5f8fa;
+    --text-light: #ffffff;
+    --text-dark: #2c2c2c;
+    --gray-light: #eaeaea;
+    --gray: #999999;
+    
+    /* Legacy variables */
+    --dctfd-primary: var(--primary-color);
+    --dctfd-secondary: var(--primary-light);
+    --dctfd-accent: var(--accent-color);
+    --dctfd-light: var(--light-color);
+    --dctfd-dark: var(--primary-dark);
+    --dctfd-success: var(--success-color);
+    --dctfd-warning: var(--warning-color);
+    --dctfd-danger: var(--danger-color);
     --dctfd-info: #039be5;
+}
+
+/* Dashboard container */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Admin navigation sidebar */
+.dashboard-nav {
+  width: 250px;
+  background-color: var(--dark-color);
+  color: var(--text-light);
+  transition: width 0.3s ease;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+  padding: 0;
+}
+
+.dashboard-logo {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-logo h2 {
+  color: var(--text-light);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dashboard-logo i {
+  margin-right: 10px;
+  color: var(--primary-light);
+}
+
+.dashboard-content {
+  flex: 1;
+  margin-left: 250px;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+  background-color: var(--light-color);
+  min-height: 100vh;
+}
+
+/* User section in sidebar */
+.user-section {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 15px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-light);
+}
+
+.user-info {
+  margin-left: 10px;
+  overflow: hidden;
+}
+
+.user-name {
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Navigation menu */
+.nav-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  margin-bottom: 2px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-left-color: var(--primary-light);
+}
+
+.nav-link i {
+  margin-right: 15px;
+  width: 20px;
+  text-align: center;
 }
 
 /* Header styles */
 #header {
-    background: var(--dctfd-primary);
+    background: var(--primary-color);
     color: white;
 }
 
@@ -23,27 +158,27 @@
 }
 
 div.breadcrumbs {
-    background: var(--dctfd-secondary);
+    background: var(--primary-light);
 }
 
 /* Module styles */
 .module h2, .module caption, .inline-group h2 {
-    background: var(--dctfd-primary);
+    background: var(--primary-color);
 }
 
 /* Button styles */
 .button, input[type=submit], input[type=button], .submit-row input, a.button {
-    background: var(--dctfd-primary);
+    background: var(--primary-color);
 }
 
 .button:active, input[type=submit]:active, input[type=button]:active,
 .button:focus, input[type=submit]:focus, input[type=button]:focus,
 .button:hover, input[type=submit]:hover, input[type=button]:hover {
-    background: var(--dctfd-dark);
+    background: var(--primary-dark);
 }
 
 .button.default, input[type=submit].default, .submit-row input.default {
-    background: var(--dctfd-accent);
+    background: var(--accent-color);
 }
 
 /* Development mode indicator */

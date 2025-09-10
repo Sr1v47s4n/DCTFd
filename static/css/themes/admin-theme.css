@@ -1,20 +1,57 @@
 /* Admin Theme Styles */
 
 :root {
-    --dctfd-primary: #4a148c;
-    --dctfd-secondary: #7b1fa2;
-    --dctfd-accent: #e91e63;
-    --dctfd-light: #f3e5f5;
-    --dctfd-dark: #311b92;
-    --dctfd-success: #43a047;
-    --dctfd-warning: #ffb300;
-    --dctfd-danger: #e53935;
+    /* Admin color palette */
+    --primary-color: #4e31aa;
+    --primary-dark: #3a2683;
+    --primary-light: #6545c9;
+    --accent-color: #ff5722;
+    --success-color: #2ecc71;
+    --warning-color: #f39c12;
+    --danger-color: #e74c3c;
+    --dark-color: #1e1e2d;
+    --light-color: #f5f8fa;
+    --text-light: #ffffff;
+    --text-dark: #2c2c2c;
+    --gray-light: #eaeaea;
+    --gray: #999999;
+    
+    /* Legacy variables */
+    --dctfd-primary: var(--primary-color);
+    --dctfd-secondary: var(--primary-light);
+    --dctfd-accent: var(--accent-color);
+    --dctfd-light: var(--light-color);
+    --dctfd-dark: var(--primary-dark);
+    --dctfd-success: var(--success-color);
+    --dctfd-warning: var(--warning-color);
+    --dctfd-danger: var(--danger-color);
     --dctfd-info: #039be5;
+}
+
+/* Dashboard navigation styles */
+.dashboard-nav {
+    background-color: var(--dark-color);
+    background-image: linear-gradient(to bottom, var(--dark-color), #2d2d42);
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
+    right: auto;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    z-index: 1000;
+    padding: 0;
+    overflow-y: auto;
+}
+
+.dashboard-content {
+    margin-left: 250px;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
 }
 
 /* Header styles */
 #header {
-    background: var(--dctfd-primary);
+    background: var(--primary-color);
     color: white;
 }
 
