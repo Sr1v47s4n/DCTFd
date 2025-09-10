@@ -1,4 +1,9 @@
+
 # DCTFd - Capture The Flag Platform
+
+<p align="center">
+  <img src="static/images/logo.png" alt="DCTFd Logo" width="150">
+</p>
 
 Hey there! Welcome to DCTFd, a Django-powered platform for running awesome Capture The Flag competitions.
 
