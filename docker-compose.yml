@@ -18,7 +18,7 @@ services:
       - DEBUG=${DEBUG:-False}
       - DEV_MODE=${DEV_MODE:-False}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
-      - EVENT_NAME=${EVENT_NAME:-Section 13(September Edition)}
+      - EVENT_NAME=${EVENT_NAME:-DCTFd}
       # Default database configuration
       - DB_NAME=${DB_NAME:-dctfd_db}
       - DB_USER=${DB_USER:-dctfd_user}

@@ -22,7 +22,7 @@ DEBUG = True
 DEV_MODE = True
 
 # Default CTF Event Name
-EVENT_NAME = os.environ.get("EVENT_NAME", "Section 13(September Edition)")
+EVENT_NAME = os.environ.get("EVENT_NAME", "DCTFd")
 
 # Update SITE_NAME to use EVENT_NAME
 SITE_NAME = EVENT_NAME
